@@ -12,4 +12,11 @@ set :scm, :localcopy
 set :tar_verbose, false
 
 # Vagrant directory not needed in production
-set :exclude_dir, %W(vagrant)
+set :include_dir, %W(.rspec)
+set :exclude_dir, %W(vagrant bin config log Gemfile.lock)
+
+# Fix Bundler from different platforms (remove --deployment from default flags)
+set :bundle_flags, '--quiet'
+
+# Install test environment to test everything works fine in production
+set :bundle_without, 'development'
