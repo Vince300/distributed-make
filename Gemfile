@@ -9,6 +9,9 @@ gem "rake", "~> 11.3"
 # RSpec testing suite
 gem "rspec", "~> 3.5", group: :test
 
+# Treetop parser engine
+gem "treetop", "~> 1.6"
+
 # Capistrano deployment framework
 group :development do
   gem "capistrano", "~> 3.6.1"

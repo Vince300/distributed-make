@@ -1,0 +1,46 @@
+grammar Makefile
+  # The Makefile body
+  rule body
+    space rule:make_rule* space <DistributedMake::Makefile::Body>
+  end
+
+  # A rule to make some target according to dependencies
+  rule make_rule
+    target sspace ':' dependencies sspace
+      commands space <DistributedMake::Makefile::Rule>
+  end
+
+  # A target name
+  rule target
+    identifier
+  end
+
+  # A list of dependencies
+  rule dependencies
+    (sspace name:identifier)*
+  end
+
+  # A list of newline commands
+  rule commands
+    (newline+ [\t]+ command:([^\r\n]* <DistributedMake::Makefile::Command>))*
+  end
+
+  # Some optional space that must end at an EOL
+  rule space
+    (sspace newline)*
+  end
+
+  # Generic whitespace
+  rule sspace
+    [ \t]*
+  end
+
+  rule newline
+    [\r]? [\n]
+  end
+
+  # An identifier (something that looks like a filename)
+  rule identifier
+    [^\\\/:*?"<>|\s\r\n\t]+ <DistributedMake::Makefile::Identifier>
+  end
+end
