@@ -2,3 +2,5 @@
 /.idea/
 /bin/
 /Gemfile.lock
+/log/
+.vagrant

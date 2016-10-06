@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Check required Vagrant plugins are properly installed
+required_plugins = %W(vagrant-hostmanager)
+required_plugins.each do |required_plugin|
+  unless Vagrant.has_plugin?(required_plugin)
+    raise <<-EOT
+      #{required_plugin} is not installed!
+      Please run the command "vagrant plugin install #{required_plugin}"
+    EOT
+  end
+end
+
+# Begin Vagrant configuration. See https://docs.vagrantup.com for reference.
+Vagrant.configure("2") do |config| 
+  # Use a minimalist Debian box
+  config.vm.box = "minimal/jessie64"
+
+  # Use hostmanager so we can refere to hosts from the host machine
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.manage_guest = true
+  config.hostmanager.ignore_private_ip = false
+  config.hostmanager.include_offline = true
+
+  # 2 is the number of workers to spawn using this Vagrantfile
+  2.times.map { |i| i + 1 }.each do |worker_n|
+    config.vm.define "worker#{worker_n}" do |worker|
+      worker.vm.network :private_network, :ip => "10.20.1.1#{worker_n}"
+      worker.vm.hostname = "worker#{worker_n}.dmake"
+
+      # Install system-wide dependencies
+      worker.vm.provision "shell", path: "root-provision.sh"
+      # Install projet as vagrant user
+      # worker.vm.provision "shell", path: "user-provision.sh", privileged: false
+    end
+  end
+
+  # Disable automatic box update checking.
+  # Run `vagrant box outdated` to check for updates.
+  config.vm.box_check_update = false
+end
