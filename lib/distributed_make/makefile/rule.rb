@@ -7,7 +7,8 @@ module DistributedMake::Makefile
     def to_ast
       { target: target.to_ast, # Target name
         dependencies: dependencies.elements.map { |el| el.name.to_ast },
-        commands: commands.elements.map { |cmd| cmd.command.to_ast } }
+        commands: commands.elements.map { |cmd| cmd.command.to_ast },
+        defined_at: input.line_of(interval.first) }
     end
   end
 end
