@@ -12,17 +12,17 @@ module DistributedMake
     # Load the Makefile grammar
     Treetop.load(File.expand_path('../makefile/grammar.treetop', __FILE__))
 
-    # Singleton instance of the Makefile parser
-    @@parser = MakefileParser.new
-
     # Parses the given source as a Makefile
     def self.parse(source, filename=nil)
+      # Instantiate the makefile parser
+      parser = MakefileParser.new
+
       # Run the parser
-      tree = @@parser.parse(source)
+      tree = parser.parse(source)
 
       # Handle errors
       if tree.nil?
-        raise SyntaxError.new(@@parser.failure_reason, @@parser.failure_line, @@parser.failure_column, filename)
+        raise SyntaxError.new(parser.failure_reason, parser.failure_line, parser.failure_column, filename)
       end
 
       # Return AST
