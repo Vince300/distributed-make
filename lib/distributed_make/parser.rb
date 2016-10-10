@@ -8,7 +8,7 @@ require "distributed_make/makefile/command"
 require "treetop"
 
 module DistributedMake
-  class Parser
+  module Parser
     # Load the Makefile grammar
     Treetop.load(File.expand_path('../makefile/grammar.treetop', __FILE__))
 
