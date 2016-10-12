@@ -74,6 +74,16 @@ Le groupe `test` du Gemfile doit être installé (option par défaut). Les tests
 bin/rake test
 ```
 
+## Documentation
+
+La documentation peut être affichée grâce au serveur `yard`.
+
+```bash
+bin/yard server
+```
+
+Il suffit ensuite d'afficher l'adresse indiquée dans le navigateur.
+
 ## Environnement de test Vagrant
 
 Le dossier `vagrant/` contient :

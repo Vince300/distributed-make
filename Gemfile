@@ -21,4 +21,6 @@ group :development do
   gem "capistrano-bundler", "~> 1.2"
   gem "capistrano-rvm", "~> 0.1"
   gem "capistrano-scm-localcopy", "~> 0.1"
+
+  gem "yard", "~> 0.9.5"
 end
