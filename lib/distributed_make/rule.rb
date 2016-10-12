@@ -12,12 +12,32 @@ module DistributedMake
 
     # Initializes a new instance of the Rule class from an AST node.
     #
-    # @param [Hash] ast_node Syntax node used to define this rule.
-    def initialize(ast_node)
-      @name = ast_node[:target]
-      @dependencies = ast_node[:dependencies]
-      @commands = ast_node[:commands]
-      @defined_at = ast_node[:defined_at]
+    # @param [String] target the target name for this rule.
+    # @param [Array<String>] dependencies the list of dependencies for this rule.
+    # @param [Array<String>] commands the list of commands to execute as part of this rule.
+    # @param [Fixnum] defined_at line in the source file this rule has been declared. Useful for error reporting.
+    def initialize(target, dependencies, commands, defined_at)
+      @name = target
+      @dependencies = dependencies
+      @commands = commands
+      @defined_at = defined_at
+    end
+
+    # Converts this rule into a hash for inspection.
+    #
+    # @return [Hash] A hash representing the object with the following attributes:
+    #   * [String] <tt>:target</tt> the target name for this rule.
+    #   * [Array<String>] <tt>:dependencies</tt> the list of dependencies for this rule.
+    #   * [Array<String>] <tt>:commands</tt> the list of commands to execute as part of this rule.
+    #   * [Fixnum] <tt>:defined_at</tt> line in the source file this rule has been declared. Useful for error
+    #       reporting.
+    def to_h
+      {
+        :target => @name,
+        :dependencies => @dependencies.dup,
+        :commands => @commands.dup,
+        :defined_at => @defined_at
+      }
     end
   end
 end

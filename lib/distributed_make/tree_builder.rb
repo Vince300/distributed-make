@@ -9,7 +9,7 @@ require "tree"
 module DistributedMake::TreeBuilder
   # Build a tree from the given ast.
   #
-  # @param [Array] ast
+  # @param [Array<DistributedMake::Rule>] ast
   def self.build_tree(ast, filename=nil)
     # The list of nodes that have been created to represent the make tree
     defined_nodes = {}
@@ -17,23 +17,23 @@ module DistributedMake::TreeBuilder
     # Process all rules present in the AST
     ast.each do |rule|
       # Get the defined node for this rule
-      node = defined_nodes[rule[:target]]
+      node = defined_nodes[rule.name]
 
       # Create the tree node
       if node.nil?
-        node = Tree::TreeNode.new(rule[:target])
+        node = Tree::TreeNode.new(rule.name)
         defined_nodes[node.name] = node
       end
 
       # Build the node contents
       if node.content.nil?
-        node.content = DistributedMake::Rule.new(rule)
+        node.content = rule
       else
         # The node already has a content attribute defined
         # This means this rule has already been defined
         raise DistributedMake::MakefileError.new(
-          "Rule #{rule[:target]} already defined at line #{node.content.defined_at}",
-          rule[:defined_at],
+          "Rule #{rule.name} already defined at line #{node.content.defined_at}",
+          rule.defined_at,
           filename
         )
       end
@@ -61,7 +61,7 @@ module DistributedMake::TreeBuilder
 
             # Raise the error
             raise DistributedMake::MakefileError.new("Circular dependency found: #{parentage.join(" -> ")}",
-                                                     rule[:defined_at], filename)
+                                                     rule.defined_at, filename)
           end
         end
 

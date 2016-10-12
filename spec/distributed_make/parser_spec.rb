@@ -1,6 +1,6 @@
 describe DistributedMake::Parser do
   def parse(source, filename = nil)
-    DistributedMake::Parser.parse(source, filename)
+    DistributedMake::Parser.parse(source, filename).collect { |rule| rule.to_h }
   end
 
   it "parses an empty file" do
