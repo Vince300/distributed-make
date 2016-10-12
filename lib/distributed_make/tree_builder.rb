@@ -52,11 +52,11 @@ module DistributedMake::TreeBuilder
 
         # Check that the current node is not an ancestor of dep_node
         # This would indicate a circular dependency in the Makefile
-        unless dep_node.is_root?
-          if dep_node.parentage.include? node
+        unless node.is_root?
+          if node.parentage.include? dep_node
             # There is a circular dependency, build a proper error message
-            parentage = dep_node.parentage
-            target_index = parentage.find_index(node)
+            parentage = node.parentage
+            target_index = parentage.find_index(dep_node)
             parentage = parentage[0..target_index]
 
             # Raise the error

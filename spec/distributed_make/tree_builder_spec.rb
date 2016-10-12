@@ -49,6 +49,28 @@ describe DistributedMake::TreeBuilder do
     expect(node.content).to be_nil
   end
 
+  it "detects duplicated rules" do
+    expect do
+      build_tree([{target: 'a', dependencies: [], commands: [], defined_at: 1},
+                  {target: 'a', dependencies: [], commands: [], defined_at: 2}])
+    end.to raise_error(DistributedMake::MakefileError)
+  end
+
+  it "detects direct circular dependencies" do
+    expect do
+      build_tree([{target: 'a', dependencies: ['b'], commands: [], defined_at: 1},
+                  {target: 'b', dependencies: ['a'], commands: [], defined_at: 2}])
+    end.to raise_error(DistributedMake::MakefileError)
+  end
+
+  it "detects longer circular dependencies" do
+    expect do
+      build_tree([{target: 'a', dependencies: ['c'], commands: [], defined_at: 1},
+                  {target: 'b', dependencies: ['a'], commands: [], defined_at: 2},
+                  {target: 'c', dependencies: ['b'], commands: [], defined_at: 3}])
+    end.to raise_error(DistributedMake::MakefileError)
+  end
+
   Dir.glob("spec/fixtures/**/Makefile").each do |makefile|
     it "builds a tree for #{makefile}" do
       tree = DistributedMake::Parser.parse(File.read(makefile), makefile)
