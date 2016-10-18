@@ -29,7 +29,7 @@ module DistributedMake::Agents
           url = "druby://#{host}"
         end
 
-        @logger.info("starting DRb at #{url}")
+        @logger.info("starting DRb at #{url || 'the default location'}")
 
         # Start service
         DRb.start_service(url)
