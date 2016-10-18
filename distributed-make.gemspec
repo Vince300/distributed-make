@@ -6,8 +6,8 @@ require "distributed_make/version"
 Gem::Specification.new do |spec|
   spec.name          = "distributed-make"
   spec.version       = DistributedMake::VERSION
-  spec.authors       = ["ASSOULINE Daniel", "GIROUX Baptiste", "SIBILLE Gaspard", "TAVERNIER Vincent"]
-  spec.email         = ["assoulid@ensimag.grenoble-inp.fr", "girouxb@ensimag.grenoble-inp.fr", "sibilleg@ensimag.grenoble-inp.fr", "taverniv@ensimag.grenoble-inp.fr"]
+  spec.authors       = DistributedMake::AUTHORS
+  spec.email         = DistributedMake::AUTHOR_EMAILS
 
   spec.summary       = %q{distributed-make distributed systems project}
   spec.homepage      = "https://bitbucket.org/Vince300/distributed-make"

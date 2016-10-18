@@ -11,6 +11,7 @@ require "distributed_make"
 program :name, 'distributed-make'
 program :version, DistributedMake::VERSION
 program :description, 'Distributed Make entry point'
+program :help, 'Authors', DistributedMake::AUTHORS.zip(DistributedMake::AUTHOR_EMAILS).map { |item| "#{item[0]} <#{item[1]}>"}.join("\n" + " " * 4)
 
 # Initialize logger
 logger = Logger.new(STDOUT)
