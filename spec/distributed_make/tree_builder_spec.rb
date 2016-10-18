@@ -74,7 +74,13 @@ describe DistributedMake::TreeBuilder do
   Dir.glob("spec/fixtures/**/Makefile").each do |makefile|
     it "builds a tree for #{makefile}" do
       tree = DistributedMake::Parser.parse(File.read(makefile), makefile)
-      expect { DistributedMake::TreeBuilder.build_tree(tree, makefile) }.to_not raise_error
+      expect do
+        DistributedMake::TreeBuilder.build_tree(tree, makefile).each do |root|
+          root.print_tree do |node, prefix|
+            puts "#{prefix} #{(node.content || node.name).to_s}"
+          end
+        end
+      end.to_not raise_error
     end
   end
 end

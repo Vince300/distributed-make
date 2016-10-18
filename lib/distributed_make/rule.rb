@@ -39,5 +39,12 @@ module DistributedMake
         :defined_at => @defined_at
       }
     end
+
+    # Returns a string representing this Makefile rule.
+    #
+    # @return [String] String representing the rule.
+    def to_s
+      "(rule) #{@name}: #{@dependencies.join(' ')}"
+    end
   end
 end
