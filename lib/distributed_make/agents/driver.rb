@@ -12,7 +12,7 @@ module DistributedMake::Agents
     #
     # @param [String, nil] host Hostname for the dRuby service.
     def run(host = nil, period = 5)
-      @logger.debug("begin #{__method__.to_s}")
+      logger.debug("begin #{__method__.to_s}")
 
       # Start DRb service
       start_drb(host)
@@ -22,16 +22,16 @@ module DistributedMake::Agents
 
       # Setup Ring server
       @server = Rinda::RingServer.new(@ts)
-      @logger.info("started ring server")
+      logger.info("started ring server")
 
       begin
         # Wait for work
         DRb.thread.join
       rescue Interrupt => e
-        @logger.info("exiting")
+        logger.info("exiting")
       end
 
-      @logger.debug("end #{__method__.to_s}")
+      logger.debug("end #{__method__.to_s}")
     end
   end
 end

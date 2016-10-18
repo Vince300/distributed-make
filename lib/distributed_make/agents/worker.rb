@@ -11,7 +11,7 @@ module DistributedMake::Agents
     #
     # @param [String, nil] host Hostname for the dRuby service.
     def run(host = nil)
-      @logger.debug("begin #{__method__.to_s}")
+      logger.debug("begin #{__method__.to_s}")
 
       # Start DRb service
       start_drb(host)
@@ -25,7 +25,7 @@ module DistributedMake::Agents
         begin
           # Locate tuple space
           @ts = Rinda::RingFinger.finger.lookup_ring_any
-          @logger.info("located tuple space #{@ts}")
+          logger.info("located tuple space #{@ts}")
 
           # Reset printed_waiting for future reconnect
           printed_waiting = false
@@ -37,17 +37,17 @@ module DistributedMake::Agents
           # Just exit, Ctrl+C
           run_worker = false
         rescue DRb::DRbConnError => e
-          @logger.info("tuple space terminated, waiting for new tuple space to join")
+          logger.info("tuple space terminated, waiting for new tuple space to join")
         rescue RuntimeError => e
           if e.message == 'RingNotFound'
             # The Ring was not found, notify the user (once) about retrying
             unless printed_waiting
-              @logger.warn("checking periodically if tuple space is available")
+              logger.warn("checking periodically if tuple space is available")
               printed_waiting = true
             end
           else
             # Log unexpected exception
-            @logger.fatal(e)
+            logger.fatal(e)
 
             # Abort because of runtime error
             run_worker = false
@@ -55,7 +55,7 @@ module DistributedMake::Agents
         end
       end
 
-      @logger.debug("end #{__method__.to_s}")
+      logger.debug("end #{__method__.to_s}")
     end
   end
 end
