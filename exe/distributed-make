@@ -22,7 +22,7 @@ command :driver do |c|
   c.example 'Run the driver listening on all addresses', 'distributed-make driver'
   c.example 'Run the driver listening on localhost', 'distributed-make driver --host localhost'
   c.example 'Run the driver listening on localhost, with a specific port', 'distributed-make driver --host localhost:12345'
-  c.option '--host', 'Hostname to use for dRuby'
+  c.option '--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby'
   c.action do |args, options|
     driver = DistributedMake::Agents::Driver.new(logger)
     driver.run(options.host)
@@ -36,7 +36,7 @@ command :worker do |c|
   c.example 'Run the worker listening on all addresses', 'distributed-make worker'
   c.example 'Run the worker listening on localhost', 'distributed-make worker --host localhost'
   c.example 'Run the worker listening on localhost, with a specific port', 'distributed-make worker --host localhost:12345'
-  c.option '--host', 'Hostname to use for dRuby'
+  c.option '--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby'
   c.action do |args, options|
     driver = DistributedMake::Agents::Worker.new(logger)
     driver.run(options.host)
