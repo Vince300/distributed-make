@@ -21,6 +21,9 @@ module DistributedMake
       @dependencies = dependencies
       @commands = commands
       @defined_at = defined_at
+
+      @done = false
+      @processing = false
     end
 
     # Converts this rule into a hash for inspection.
@@ -38,6 +41,34 @@ module DistributedMake
         :commands => @commands.dup,
         :defined_at => @defined_at
       }
+    end
+
+    # Returns a value indicating if this rule is complete.
+    #
+    # @return [Bool] <tt>true</tt> if this rule is complete, <tt>false</tt> otherwise.
+    def done?
+      @done
+    end
+
+    # Sets a value indicating if this rule is complete.
+    #
+    # @param [Bool] value <tt>true</tt> if this rule is complete, <tt>false</tt> otherwise.
+    def done=(value)
+      @done = value
+    end
+
+    # Returns a value indicating if this rule is being processed.
+    #
+    # @return [Bool] <tt>true</tt> if this rule is being processed, <tt>false</tt> otherwise.
+    def processing?
+      @processing
+    end
+
+    # Sets a value indicating if this rule is being processed.
+    #
+    # @param [Bool] value <tt>true</tt> if this rule is being processed, <tt>false</tt> otherwise.
+    def processing=(value)
+      @processing = value
     end
 
     # Returns a string representing this Makefile rule.

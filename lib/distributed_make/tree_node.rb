@@ -120,6 +120,21 @@ module DistributedMake
       end
     end
 
+    # Pre-ordered node walking. If the block returns truthy, then sub-nodes are walked.
+    #
+    # @yieldparam [TreeNode] node The current node.
+    def each_node
+      if yield self
+        @children.each do |child|
+          # Call each_node on every child
+          child.each_node do |node|
+            # Call parent block
+            yield node
+          end
+        end
+      end
+    end
+
     protected
       def delete_child(child)
         @children.delete(child)

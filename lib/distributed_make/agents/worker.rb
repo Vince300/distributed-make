@@ -10,6 +10,7 @@ module DistributedMake::Agents
     # Run the driver agent on the given host.
     #
     # @param [String, nil] host Hostname for the dRuby service.
+    # @yieldparam [Worker] agent Running driver agent.
     def run(host = nil)
       logger.debug("begin #{__method__.to_s}")
 
@@ -30,9 +31,13 @@ module DistributedMake::Agents
           # Reset printed_waiting for future reconnect
           printed_waiting = false
 
-          # We have joined the tuple space, wait for the goodbye tuple
-          # The goodbye tuple will never show up, but when the tuple space disconnects we will catch the error
-          @ts.read(['goodbye'])
+          # Read the parameters for this space
+          tuple = @ts.read([:tuplespace, :period, nil])
+          @period = tuple[2]
+          logger.debug("new tuple space period is #{@period} second(s)")
+
+          # We have joined the tuple space, start processing using this agent
+          yield self
         rescue Interrupt => e
           # Just exit, Ctrl+C
           run_worker = false
@@ -56,6 +61,40 @@ module DistributedMake::Agents
       end
 
       logger.debug("end #{__method__.to_s}")
+    end
+
+    def process_work
+      # Forever
+      while true
+        # Take a task to do
+        tuple = @ts.take([:task, nil, :todo])
+
+        # Notify
+        logger.info("got task #{tuple[1]}")
+
+        # Tell tuple space we are processing, watching for timeout
+        @ts.write([:task, tuple[1], :working], SimpleRenewer.new(2 * @period))
+
+        # Do some work
+        sleep(1)
+
+        # Log that we are done
+        logger.info("task #{tuple[1]} completed")
+
+        # We are done here
+        @ts.write([:task, tuple[1], :done])
+        @ts.take([:task, tuple[1], :working])
+      end
+    end
+  end
+
+  class SimpleRenewer
+    include DRbUndumped
+    def initialize(sec)
+      @sec = sec
+    end
+    def renew
+      @sec
     end
   end
 end

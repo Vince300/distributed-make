@@ -35,12 +35,42 @@ command :driver do |c|
   c.example 'Run the driver listening on all addresses', 'distributed-make driver'
   c.example 'Run the driver listening on localhost', 'distributed-make driver --host localhost'
   c.example 'Run the driver listening on localhost, with a specific port', 'distributed-make driver --host localhost:12345'
-  c.option '--period SECONDS', Fixnum, 'Tuple space cleanup period, defaults to 5 seconds'
+  c.option '--period SECONDS', Integer, 'Tuple space cleanup period, defaults to 5 seconds'
+  c.option '-f MAKEFILE', String, 'Name of the makefile to process, defaults to Makefile'
   c.action do |args, options|
-    options.default period: 5
+    # Setup defaults
+    options.default period: 5, f: 'Makefile'
 
-    driver = DistributedMake::Agents::Driver.new(logger)
-    driver.run(options.host, options.period)
+    # The name of the Makefile to process
+    filename = options.f
+
+    begin
+      contents = File.read(filename)
+
+      # Parse the input Makefile
+      logger.info("parsing #{filename}")
+      ast = DistributedMake::Parser.parse(contents, filename)
+
+      logger.info("preparing tree for #{filename}")
+
+      # Transform it into the associated dependency tree
+      tree = DistributedMake::TreeBuilder.build_tree(ast, filename)
+
+      # Start the Makefile driver
+      driver = DistributedMake::Agents::Driver.new(logger)
+      driver.run(options.host, options.period) do |agent|
+        # Tell the agent to start processing the current tree
+        agent.make_tree(tree)
+      end
+    rescue Errno::ENOENT
+      logger.error("#{filename} not found")
+    rescue DistributedMake::Error => e
+      # Abort, "expected" class of errors
+      logger.error(e)
+    rescue StandardError => e
+      # Unexpected error occurred
+      logger.fatal(e)
+    end
   end
 end
 
@@ -53,7 +83,10 @@ command :worker do |c|
   c.example 'Run the worker listening on localhost, with a specific port', 'distributed-make worker --host localhost:12345'
   c.action do |args, options|
     driver = DistributedMake::Agents::Worker.new(logger)
-    driver.run(options.host)
+    driver.run(options.host) do |agent|
+      # Tell the agent to wait for work
+      agent.process_work
+    end
   end
 end
 
