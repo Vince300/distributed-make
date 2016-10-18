@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "commander/import"
+require "logger"
+
+# Load distributed_make gem
+$LOAD_PATH.unshift(File.expand_path(File.join(__FILE__, "../../lib")))
+require "distributed_make"
+
+program :name, 'distributed-make'
+program :version, DistributedMake::VERSION
+program :description, 'Distributed Make entry point'
+
+# Initialize logger
+logger = Logger.new(STDOUT)
+
+command :driver do |c|
+  c.syntax = 'distributed-make driver [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'Run the driver listening on all addresses', 'distributed-make driver'
+  c.example 'Run the driver listening on localhost', 'distributed-make driver --host localhost'
+  c.example 'Run the driver listening on localhost, with a specific port', 'distributed-make driver --host localhost:12345'
+  c.option '--host', 'Hostname to use for dRuby'
+  c.action do |args, options|
+    driver = DistributedMake::Agents::Driver.new(logger)
+    driver.run(options.host)
+  end
+end
+
+command :worker do |c|
+  c.syntax = 'distributed-make worker [options]'
+  c.summary = ''
+  c.description = ''
+  c.example 'Run the worker listening on all addresses', 'distributed-make worker'
+  c.example 'Run the worker listening on localhost', 'distributed-make worker --host localhost'
+  c.example 'Run the worker listening on localhost, with a specific port', 'distributed-make worker --host localhost:12345'
+  c.option '--host', 'Hostname to use for dRuby'
+  c.action do |args, options|
+    driver = DistributedMake::Agents::Worker.new(logger)
+    driver.run(options.host)
+  end
+end
+
