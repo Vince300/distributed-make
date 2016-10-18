@@ -1,4 +1,5 @@
 require "distributed_make/base"
+require "distributed_make/error"
 
 module DistributedMake
   # Represents an error that occurs because a Makefile has not been constructed properly.
@@ -6,7 +7,7 @@ module DistributedMake
   # @attr_reader [String] file Name of the file that raised this error.
   # @attr_reader [Fixnum] line Line in the file at which this error occurred.
   # @attr_reader [String] reason Message describing the error that occurred, such as duplicate rule definition or circular dependency.
-  class MakefileError < StandardError
+  class MakefileError < Error
     attr_reader :file, :line, :reason
 
     # Initialize a new instance of the @see DistributedMake::MakefileError class.

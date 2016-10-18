@@ -1,4 +1,5 @@
 require "distributed_make/base"
+require "distributed_make/error"
 
 module DistributedMake
   # Represents an error that occurs because a Makefile has not been written properly.
@@ -7,7 +8,7 @@ module DistributedMake
   # @attr_reader [Fixnum] line Line in the file at which this error occurred.
   # @attr_reader [Fixnum] column Column in the file at which this error occurred.
   # @attr_reader [String] reason Message describing the error that occurred, such as duplicate rule definition or circular dependency.
-class SyntaxError < StandardError
+class SyntaxError < Error
     attr_reader :file, :line, :column, :reason
 
     # Initialize a new instance of the @see DistributedMake::SyntaxError class.
