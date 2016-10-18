@@ -13,31 +13,44 @@ program :version, DistributedMake::VERSION
 program :description, 'Distributed Make entry point'
 program :help, 'Authors', DistributedMake::AUTHORS.zip(DistributedMake::AUTHOR_EMAILS).map { |item| "#{item[0]} <#{item[1]}>"}.join("\n" + " " * 4)
 
+# The default command should be the distrubted make driver, so we can just "distributed-make" from a directory
+default_command :driver
+
+# Hostname is a global option for all commands
+global_option '--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby'
+
 # Initialize logger
 logger = Logger.new(STDOUT)
 
 command :driver do |c|
   c.syntax = 'distributed-make driver [options]'
-  c.summary = ''
-  c.description = ''
+  c.summary = 'Start building a Makefile on a worker pool'
+  c.description = <<-EOT
+  Using the default configuration, running `distributed-make` in a folder
+  containing a Makefile should distribute the building process accross all
+  workers that will register with this driver process.
+
+  Options may be used to alter the behavior depending on the current setup.
+  EOT
   c.example 'Run the driver listening on all addresses', 'distributed-make driver'
   c.example 'Run the driver listening on localhost', 'distributed-make driver --host localhost'
   c.example 'Run the driver listening on localhost, with a specific port', 'distributed-make driver --host localhost:12345'
-  c.option '--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby'
+  c.option '--period SECONDS', Fixnum, 'Tuple space cleanup period, defaults to 5 seconds'
   c.action do |args, options|
+    options.default period: 5
+
     driver = DistributedMake::Agents::Driver.new(logger)
-    driver.run(options.host)
+    driver.run(options.host, options.period)
   end
 end
 
 command :worker do |c|
   c.syntax = 'distributed-make worker [options]'
-  c.summary = ''
+  c.summary = 'Start a distributed make worker process'
   c.description = ''
   c.example 'Run the worker listening on all addresses', 'distributed-make worker'
   c.example 'Run the worker listening on localhost', 'distributed-make worker --host localhost'
   c.example 'Run the worker listening on localhost, with a specific port', 'distributed-make worker --host localhost:12345'
-  c.option '--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby'
   c.action do |args, options|
     driver = DistributedMake::Agents::Worker.new(logger)
     driver.run(options.host)
