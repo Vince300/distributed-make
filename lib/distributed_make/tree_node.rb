@@ -120,7 +120,7 @@ module DistributedMake
       end
     end
 
-    private
+    protected
       def delete_child(child)
         @children.delete(child)
         @children_lookup.delete(child.name)
