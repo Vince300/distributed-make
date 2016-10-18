@@ -49,7 +49,7 @@ describe DistributedMake::Parser do
   end
 
   it "expects targets to start on a line start" do
-    expect { parse("  output.o:") }.to raise_error(DistributedMake::SyntaxError)
+    expect { parse("  output.o:") }.to raise_error(DistributedMake::SyntaxError, /\(no source\):1:3/)
   end
 
   it "expects commands to start with tabs" do

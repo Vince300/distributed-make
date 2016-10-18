@@ -53,14 +53,14 @@ describe DistributedMake::TreeBuilder do
     expect do
       build_tree([{target: 'a', dependencies: [], commands: [], defined_at: 1},
                   {target: 'a', dependencies: [], commands: [], defined_at: 2}])
-    end.to raise_error(DistributedMake::MakefileError)
+    end.to raise_error(DistributedMake::MakefileError, /already/)
   end
 
   it "detects direct circular dependencies" do
     expect do
       build_tree([{target: 'a', dependencies: ['b'], commands: [], defined_at: 1},
                   {target: 'b', dependencies: ['a'], commands: [], defined_at: 2}])
-    end.to raise_error(DistributedMake::MakefileError)
+    end.to raise_error(DistributedMake::MakefileError, /circular/i)
   end
 
   it "detects longer circular dependencies" do
@@ -68,7 +68,7 @@ describe DistributedMake::TreeBuilder do
       build_tree([{target: 'a', dependencies: ['c'], commands: [], defined_at: 1},
                   {target: 'b', dependencies: ['a'], commands: [], defined_at: 2},
                   {target: 'c', dependencies: ['b'], commands: [], defined_at: 3}])
-    end.to raise_error(DistributedMake::MakefileError)
+    end.to raise_error(DistributedMake::MakefileError, /circular/i)
   end
 
   Dir.glob("spec/fixtures/**/Makefile").each do |makefile|
