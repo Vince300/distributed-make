@@ -4,6 +4,7 @@ require "distributed_make/agents/agent"
 require "drb/drb"
 require "rinda/tuplespace"
 require "rinda/ring"
+require "ipaddr"
 
 module DistributedMake::Agents
   # Represents a distributed make system driver.
@@ -26,8 +27,19 @@ module DistributedMake::Agents
       # Set the properties as a tuple
       @ts.write([:tuplespace, :period, @period])
 
+      # Compute Ring server addresses
+      # Default: bind to 0.0.0.0
+      addresses = [Socket::INADDR_ANY]
+
+      # Check if the specified host should be used as broadcast
+      begin
+        addresses = [IPAddr.new(host).to_s]
+      rescue AddressFamilyError
+        # Not a valid IP address, probably a hostname such as localhost
+      end
+
       # Setup Ring server
-      @server = Rinda::RingServer.new(@ts)
+      @server = Rinda::RingServer.new(@ts, addresses)
       logger.info("started ring server")
 
       begin
