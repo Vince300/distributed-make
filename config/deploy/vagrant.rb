@@ -3,6 +3,8 @@
 # Original source: https://gist.github.com/bjjb/7926219
 set :stage, :vagrant
 
+set :daemon_user, 'vagrant'
+
 # Run rake vagrant task to get ssh config
 raw_ssh_options = `rake vagrant ssh-config`
 

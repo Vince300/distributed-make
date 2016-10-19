@@ -8,6 +8,9 @@ require "logger"
 $LOAD_PATH.unshift(File.expand_path(File.join(__FILE__, "../../lib")))
 require "distributed_make"
 
+# Initialize logger
+logger = Logger.new(STDOUT)
+
 program :name, 'distributed-make'
 program :version, DistributedMake::VERSION
 program :description, 'Distributed Make entry point'
@@ -17,10 +20,10 @@ program :help, 'Authors', DistributedMake::AUTHORS.zip(DistributedMake::AUTHOR_E
 default_command :driver
 
 # Hostname is a global option for all commands
-global_option '--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby'
-
-# Initialize logger
-logger = Logger.new(STDOUT)
+global_option('--host HOSTNAME[:PORT]', String, 'Hostname to use for dRuby')
+global_option('--log FILENAME', String, 'Log output file name. Defaults to STDOUT') do |arg|
+  logger = Logger.new(arg)
+end
 
 command :driver do |c|
   c.syntax = 'distributed-make driver [options]'
