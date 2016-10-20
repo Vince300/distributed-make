@@ -1,29 +1,26 @@
 require "distributed_make/base"
+require "distributed_make/rule_stub"
 
 module DistributedMake
   # Represents a Makefile rule
   #
-  # @attr_reader [String] name Name of this rule.
   # @attr_reader [Array] dependencies List of dependencies for this rule.
   # @attr_reader [Array<String>] commands Commands to execute as part of this rule.
   # @attr_reader [Fixnum] defined_at Line at which this rule was defined in the source.
-  class Rule
-    attr_reader :name, :dependencies, :commands, :defined_at
+  class Rule < RuleStub
+    attr_reader :dependencies, :commands, :defined_at
 
-    # Initializes a new instance of the Rule class from an AST node.
+    # Initializes a new instance of the Rule class.
     #
     # @param [String] target the target name for this rule.
     # @param [Array<String>] dependencies the list of dependencies for this rule.
     # @param [Array<String>] commands the list of commands to execute as part of this rule.
     # @param [Fixnum] defined_at line in the source file this rule has been declared. Useful for error reporting.
     def initialize(target, dependencies, commands, defined_at)
-      @name = target
+      super(target)
       @dependencies = dependencies
       @commands = commands
       @defined_at = defined_at
-
-      @done = false
-      @processing = false
     end
 
     # Converts this rule into a hash for inspection.
@@ -43,39 +40,19 @@ module DistributedMake
       }
     end
 
-    # Returns a value indicating if this rule is complete.
+    # Return a value indicating if this rule is a stub
     #
-    # @return [Bool] <tt>true</tt> if this rule is complete, <tt>false</tt> otherwise.
-    def done?
-      @done
-    end
-
-    # Sets a value indicating if this rule is complete.
-    #
-    # @param [Bool] value <tt>true</tt> if this rule is complete, <tt>false</tt> otherwise.
-    def done=(value)
-      @done = value
-    end
-
-    # Returns a value indicating if this rule is being processed.
-    #
-    # @return [Bool] <tt>true</tt> if this rule is being processed, <tt>false</tt> otherwise.
-    def processing?
-      @processing
-    end
-
-    # Sets a value indicating if this rule is being processed.
-    #
-    # @param [Bool] value <tt>true</tt> if this rule is being processed, <tt>false</tt> otherwise.
-    def processing=(value)
-      @processing = value
+    # @return [Bool] <tt>true</tt> if this rule is a stub, <tt>false</tt> otherwise.
+    def is_stub?
+      false
     end
 
     # Returns a string representing this Makefile rule.
     #
     # @return [String] String representing the rule.
     def to_s
-      "(rule) #{@name}: #{@dependencies.join(' ')}"
+      "(rule) #{@name}: #{@dependencies.join(' ')} " +
+        "(done: #{if done? then 'yes' else 'no' end}, processing: #{if processing? then 'yes' else 'no' end})"
     end
   end
 end

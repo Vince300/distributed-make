@@ -63,7 +63,7 @@ command :driver do |c|
       driver = DistributedMake::Agents::Driver.new(logger)
       driver.run(options.host, options.period) do |agent|
         # Tell the agent to start processing the current tree
-        agent.make_tree(tree)
+        agent.make_tree(File.dirname(File.expand_path(Dir.getwd)), tree)
       end
     rescue Errno::ENOENT
       logger.error("#{filename} not found")

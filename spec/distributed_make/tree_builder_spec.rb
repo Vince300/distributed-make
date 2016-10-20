@@ -46,7 +46,7 @@ describe DistributedMake::TreeBuilder do
     node = node['source.c']
 
     expect(node.name).to eq 'source.c'
-    expect(node.content).to be_nil
+    expect(node.content).to be_a DistributedMake::RuleStub
   end
 
   it "detects duplicated rules" do

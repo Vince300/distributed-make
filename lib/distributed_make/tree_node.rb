@@ -14,11 +14,12 @@ module DistributedMake
     # Create a new tree node.
     #
     # @param [String] name Name of this node
-    def initialize(name)
+    def initialize(name, content = nil)
       @name = name
       @parents = []
       @children = []
       @children_lookup = {}
+      @content = content
     end
 
     def parents

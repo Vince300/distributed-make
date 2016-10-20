@@ -1,5 +1,6 @@
 require "distributed_make/base"
 require "distributed_make/rule"
+require "distributed_make/rule_stub"
 require "distributed_make/makefile_error"
 require "distributed_make/tree_node"
 
@@ -21,14 +22,14 @@ module DistributedMake
 
         # Create the tree node
         if node.nil?
-          node = TreeNode.new(rule.name)
+          node = TreeNode.new(rule.name, rule)
           defined_nodes[node.name] = node
         end
 
         # Build the node contents
-        if node.content.nil?
+        if node.content.is_stub?
           node.content = rule
-        else
+        elsif node.content != rule
           # The node already has a content attribute defined
           # This means this rule has already been defined
           raise MakefileError.new(
@@ -46,7 +47,7 @@ module DistributedMake
 
           # Create a new dependency node
           if dep_node.nil?
-            dep_node = TreeNode.new(dependency)
+            dep_node = TreeNode.new(dependency, RuleStub.new(dependency))
             defined_nodes[dependency] = dep_node
           end
 
