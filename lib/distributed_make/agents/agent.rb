@@ -1,51 +1,55 @@
 require "distributed_make/base"
 
 module DistributedMake::Agents
-  # Base class for a distributed make agent
-  #
-  # @attr_accessor [Logger] logger Logger in use by this instance
-  # @attr_accessor [Rinda::TupleSpace] ts Tuple space in use by this agent
+  # Base class for a distributed make agent.
   class Agent
-    attr_accessor :logger, :ts
+    # @return [Logger] the logger in use by this instance
+    attr_accessor :logger
+
+    # @return [Rinda::TupleSpace] the tuple space in use by this agent
+    attr_accessor :ts
 
     protected
-    # Initialize a new current tuple space
+    # Create a new agent.
     #
-    # @param [Rinda::TupleSpace] space New tuple space.
-    def join_tuple_space(space)
-      @ts = space
-
-      # Reset services
-      @services = {}
+    # @param [Logger] logger logger to use for this instance
+    def initialize(logger)
+      @logger = logger
     end
 
-    # Find a service by name
+    # Initialize a new current tuple space.
     #
-    # @param [Symbol] name Name of the service
-    # @return [Object] Service object instance
+    # @param [Rinda::TupleSpace] space new tuple space
+    # @return [Rinda::TupleSpace] joined tuple space
+    def join_tuple_space(space)
+      # Reset services
+      @services = {}
+      # Load tuple space
+      @ts = space
+    end
+
+    # Find a service by name. This method blocks until the service is available.
+    #
+    # @param [Symbol] name name of the service
+    # @return [Object] service object instance
     def service(name)
       @services[name] || (@services[name] = ts.read([:service, name, nil])[2])
     end
 
-    # Register a new service
+    # Register a new service.
     #
-    # @param [Symbol] name Name of the service
-    # @param [Object] service Service object
+    # @param [Symbol] name name of the service
+    # @param [Object] service service object
+    # @return [Object] registered service
     def register_service(name, service)
       ts.write([:service, name, service])
       @services[name] = service
     end
 
-    # Create a new agent.
-    #
-    # @param [Logger] logger Logger to use for this instance.
-    def initialize(logger)
-      @logger = logger
-    end
-
     # Start the dRuby service on the given host.
     #
-    # @param [String, nil] host Hostname to use for dRuby service.
+    # @param [String, nil] host hostname to use for dRuby service
+    # @return [void]
     def start_drb(host)
       url = nil
 
@@ -57,12 +61,13 @@ module DistributedMake::Agents
         url = "druby://#{host}"
       end
 
-      @logger.info("starting DRb at #{url || 'the default location'}")
+      logger.info("starting DRb at #{url || 'the default location'}")
 
       # Start service
       DRb.start_service(url)
 
-      @logger.info("started DRb at #{DRb.uri}")
+      logger.info("started DRb at #{DRb.uri}")
+      return
     end
   end
 end

@@ -9,10 +9,11 @@ module DistributedMake
   module Agents
     # Represents a distributed make system worker.
     class Worker < Agent
-      # Run the driver agent on the given host.
+      # Run the worker agent on the given host.
       #
-      # @param [String, nil] host Hostname for the dRuby service.
-      # @yieldparam [Worker] agent Running driver agent.
+      # @param [String, nil] host hostname for the dRuby service
+      # @yieldparam [Worker] agent running driver agent
+      # @return [void]
       def run(host = nil)
         logger.debug("begin #{__method__.to_s}")
 
@@ -61,8 +62,12 @@ module DistributedMake
         end
 
         logger.debug("end #{__method__.to_s}")
+        return
       end
 
+      # Starts an infinite loop to process incoming work on the tuple space.
+      #
+      # @return [void]
       def process_work
         # Forever
         while true
@@ -85,6 +90,7 @@ module DistributedMake
           ts.write([:task, tuple[1], :done])
           ts.take([:task, tuple[1], :working])
         end
+        return
       end
     end
   end

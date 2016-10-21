@@ -13,9 +13,9 @@ module DistributedMake
     class Driver < Agent
       # Run the driver agent on the given host.
       #
-      # @param [String, nil] host Hostname for the dRuby service.
-      # @param [Fixnum] period Period of the main tuple space.
-      # @yieldparam [Driver] agent Running driver agent.
+      # @param [String, nil] host hostname for the dRuby service
+      # @param [Fixnum] period period of the main tuple space
+      # @yieldparam [Driver] agent running driver agent
       def run(host = nil, period = 5)
         logger.debug("begin #{__method__.to_s}")
 
@@ -54,8 +54,9 @@ module DistributedMake
       # Starts the build process for the given Makefile tree.
       # This methods only returns on completion or on a fatal error.
       #
-      # @param [String] name Name of the current Make job.
-      # @param [Array(TreeNode)] tree Make tree returned by the TreeBuilder.
+      # @param [String] name name of the current Make job
+      # @param [Array(TreeNode)] tree make tree returned by the TreeBuilder
+      # @return [void]
       def make_tree(name, tree)
         # Register the job service
         register_service(:job, Services::JobService.new(name, @period))
@@ -136,9 +137,14 @@ module DistributedMake
             raise e
           end
         end
+        return
       end
 
-      private
+      protected
+      # Build a lookup hash from a make tree.
+      #
+      # @param [Array(TreeNode)] make tree
+      # @return [Hash(String, TreeNode)] lookup hash
       def build_tree_lookup(tree)
         result = {}
         tree.each do |root|
@@ -149,6 +155,10 @@ module DistributedMake
         return result
       end
 
+      # Add task entries ready for processing to the tuple space
+      #
+      # @param [Array(TreeNode)] tree make tree
+      # @return [void]
       def append_not_done(tree)
         tree.each do |root|
           root.each_node do |node|
@@ -164,18 +174,29 @@ module DistributedMake
             not rule.done?
           end
         end
+        return
       end
 
+      # Add a rule as a task in the tuple space.
+      #
+      # @param [Rule] rule make rule to add
+      # @return [Rule] added rule
       def add_rule(rule)
         logger.debug("adding #{rule} to be done")
         rule.processing = true
         ts.write([:task, rule.name, :todo])
+        rule
       end
 
+      # Flags a rule as done after processing.
+      #
+      # @param [Rule] rule make rule to flag as done
+      # @return [Rule] rule flagged as done
       def rule_done(rule)
         rule.done = true
         rule.processing = false
         logger.info("task #{rule.name} is completed")
+        rule
       end
     end
   end
