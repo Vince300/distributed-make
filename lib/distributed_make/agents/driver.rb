@@ -66,6 +66,9 @@ module DistributedMake
         @task_tree = tree
         @task_dict = build_tree_lookup(tree)
 
+        # Reset the start time
+        @started_at = nil
+
         # Register the rule service
         commands = @task_dict.collect { |key, node| [key, node.content.commands] }.to_h
         register_service(:rule, Services::RuleService.new(commands))
@@ -142,6 +145,7 @@ module DistributedMake
 
           # Root rule completed?
           if @task_tree.content.done?
+            logger.info("build job completed in #{Time.now - @started_at}s")
             notifier.cancel
           end
         elsif tuple[2] == :working
@@ -187,6 +191,9 @@ module DistributedMake
           # Add a tuple that explains this
           # Its expire should be short, so just set it to a few periods
           ts.write([:task, tuple[1], :scheduled], 5 * service(:job).period)
+
+          # Note that the first task being scheduled indicates a worker joined the space, so start timing now
+          @started_at = Time.now unless @started_at
         end
       end
 
