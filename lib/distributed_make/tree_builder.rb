@@ -6,12 +6,14 @@ require "distributed_make/tree_node"
 
 module DistributedMake
   # Module that implements a converter that builds a tree structure to represent rules and dependencies, based on the
-  # abstract syntax tree returned by the @see DistributedMake::Parser#parse method.
+  # abstract syntax tree returned by the {DistributedMake::Parser#parse} method.
   module TreeBuilder
     # Build a tree from the given ast.
     #
     # @param [Array<DistributedMake::Rule>] ast
-    def self.build_tree(ast, filename=nil)
+    # @param [String, nil] wanted_rule top-level rule name to be returned
+    # @return [TreeNode, nil] tree node corresponding to the `wanted_rule`, or `nil`
+    def self.build_tree(ast, filename=nil, wanted_rule=nil)
       # The list of nodes that have been created to represent the make tree
       defined_nodes = {}
 
@@ -71,8 +73,13 @@ module DistributedMake
         end
       end
 
-      # Return the list of all the root nodes
-      defined_nodes.select { |name, node| node.is_root? }.collect { |name, node| node }
+      if ast.empty?
+        return nil
+      else
+        # Find the wanted rule, or the first one
+        wanted_rule = ast.first.name if wanted_rule.nil?
+        return defined_nodes[wanted_rule]
+      end
     end
   end
 end

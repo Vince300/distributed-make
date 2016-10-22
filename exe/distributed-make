@@ -40,12 +40,22 @@ command :driver do |c|
   c.example 'Run the driver listening on localhost, with a specific port', 'distributed-make driver --host localhost:12345'
   c.option '--period SECONDS', Integer, 'Tuple space cleanup period, defaults to 5 seconds'
   c.option '-f MAKEFILE', String, 'Name of the makefile to process, defaults to Makefile'
+  c.option '-n', '--dry-run', 'Enable dry-run mode to test workers'
   c.action do |args, options|
     # Setup defaults
     options.default period: 5, f: 'Makefile'
 
     # The name of the Makefile to process
     filename = options.f
+
+    # Check wanted rule specification
+    wanted_rule = nil
+    if args.length > 1
+      logger.error("multiple top-level rules are not supported")
+      break
+    else
+      wanted_rule = args.first
+    end
 
     begin
       contents = File.read(filename)
@@ -57,19 +67,32 @@ command :driver do |c|
       logger.info("preparing tree for #{filename}")
 
       # Transform it into the associated dependency tree
-      tree = DistributedMake::TreeBuilder.build_tree(ast, filename)
+      tree = DistributedMake::TreeBuilder.build_tree(ast, filename, wanted_rule)
+
+      # Check we have something to do
+      if tree.nil?
+        if wanted_rule
+          raise DistributedMake::Error.new("#{wanted_rule} not found in Makefile, cannot continue")
+        else
+          logger.info("nothing to be done")
+          break
+        end
+      end
+
+      # Compute the job name
+      job_name = File.dirname(File.expand_path(Dir.getwd))
 
       # Start the Makefile driver
       driver = DistributedMake::Agents::Driver.new(logger)
-      driver.run(options.host, options.period) do |agent|
+      driver.run(options.host, job_name, options.dry_run, options.period) do |agent|
         # Tell the agent to start processing the current tree
-        agent.make_tree(File.dirname(File.expand_path(Dir.getwd)), tree)
+        agent.make_tree(tree)
       end
     rescue Errno::ENOENT
       logger.error("#{filename} not found")
     rescue DistributedMake::Error => e
       # Abort, "expected" class of errors
-      logger.error(e)
+      logger.error(e.message)
     rescue StandardError => e
       # Unexpected error occurred
       logger.fatal(e)

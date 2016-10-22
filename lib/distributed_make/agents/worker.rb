@@ -80,8 +80,10 @@ module DistributedMake
           # Tell tuple space we are processing, watching for timeout
           ts.write([:task, tuple[1], :working], Utils::SimpleRenewer.new(2 * service(:job).period))
 
-          # Do some work
-          sleep(0.1)
+          unless service(:job).dry_run?
+            # Do some work
+            sleep(1.0)
+          end
 
           # Log that we are done
           logger.info("task #{tuple[1]} completed")

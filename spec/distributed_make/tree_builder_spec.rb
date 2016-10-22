@@ -9,16 +9,12 @@ describe DistributedMake::TreeBuilder do
 
   it "builds an empty tree" do
     tree = build_tree([])
-    expect(tree).to eq []
+    expect(tree).to be_nil
   end
 
   it "builds a tree for a target with no commands nor dependencies" do
-    tree = build_tree([{target: 'output.o', dependencies: [], commands: [], defined_at: 1}])
+    node = build_tree([{target: 'output.o', dependencies: [], commands: [], defined_at: 1}])
 
-    # Only one root
-    expect(tree.length).to eq 1
-
-    node = tree[0]
     expect(node.name).to eq 'output.o'
     expect(node.content.name).to eq 'output.o'
     expect(node.content.dependencies).to eq []
@@ -27,12 +23,7 @@ describe DistributedMake::TreeBuilder do
   end
 
   it "builds a tree for a target with one dependencies" do
-    tree = build_tree([{target: 'output.o', dependencies: %W(source.c), commands: [], defined_at: 1}])
-
-    # Only one root
-    expect(tree.length).to eq 1
-
-    node = tree[0]
+    node = build_tree([{target: 'output.o', dependencies: %W(source.c), commands: [], defined_at: 1}])
 
     # Root node checking
     expect(node.name).to eq 'output.o'
@@ -75,10 +66,8 @@ describe DistributedMake::TreeBuilder do
     it "builds a tree for #{makefile}" do
       tree = DistributedMake::Parser.parse(File.read(makefile), makefile)
       expect do
-        DistributedMake::TreeBuilder.build_tree(tree, makefile).each do |root|
-          root.print_tree do |node, prefix|
-            puts "#{prefix} #{(node.content || node.name).to_s}"
-          end
+        DistributedMake::TreeBuilder.build_tree(tree, makefile).print_tree do |node, prefix|
+          puts "#{prefix} #{(node.content || node.name).to_s}"
         end
       end.to_not raise_error
     end
