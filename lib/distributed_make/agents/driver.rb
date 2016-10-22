@@ -33,7 +33,7 @@ module DistributedMake
         # Check if the specified host should be used as broadcast
         begin
           addresses = [IPAddr.new(host).to_s]
-        rescue AddressFamilyError
+        rescue IPAddr::Error
           # Not a valid IP address, probably a hostname such as localhost
         end
 
