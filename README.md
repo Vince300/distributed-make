@@ -54,6 +54,8 @@ bin/yard server
 
 Il suffit ensuite d'afficher l'adresse indiquée dans le navigateur (généralement http://localhost:8808).
 
+{file:docs/Architecture.md} présente l'architecture générale du système tel qu'implémenté.
+
 ## Environnement de test Vagrant
 
 Voir {file:docs/Vagrant.md}
