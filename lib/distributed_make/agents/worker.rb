@@ -73,12 +73,17 @@ module DistributedMake
         while true
           # Take a task to do
           tuple = ts.take([:task, nil, :todo])
+          rule_name = tuple[1]
 
           # Notify
-          logger.info("got task #{tuple[1]}")
+          logger.info("got task #{rule_name}")
 
           # Tell tuple space we are processing, watching for timeout
-          ts.write([:task, tuple[1], :working], Utils::SimpleRenewer.new(2 * service(:job).period))
+          ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(2 * service(:job).period))
+
+          # Find what we have to do
+          commands = service(:rule).commands(rule_name) || []
+          logger.info("commands to run: #{commands.join("\n")}")
 
           unless service(:job).dry_run?
             # Do some work
@@ -86,11 +91,11 @@ module DistributedMake
           end
 
           # Log that we are done
-          logger.info("task #{tuple[1]} completed")
+          logger.info("task #{rule_name} completed")
 
           # We are done here
-          ts.write([:task, tuple[1], :done])
-          ts.take([:task, tuple[1], :working])
+          ts.write([:task, rule_name, :done])
+          ts.take([:task, rule_name, :working])
         end
         return
       end

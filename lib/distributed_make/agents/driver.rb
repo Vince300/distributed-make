@@ -1,6 +1,7 @@
 require "distributed_make/base"
 require "distributed_make/agents/agent"
 require "distributed_make/services/job_service"
+require "distributed_make/services/rule_service"
 
 require "drb/drb"
 require "rinda/tuplespace"
@@ -64,6 +65,10 @@ module DistributedMake
         # Build the make tree lookup
         @task_tree = tree
         @task_dict = build_tree_lookup(tree)
+
+        # Register the rule service
+        commands = @task_dict.collect { |key, node| [key, node.content.commands] }.to_h
+        register_service(:rule, Services::RuleService.new(commands))
 
         # Create the notifier that detects task events
         done_notifier = ts.notify(nil, [:task, nil, nil])

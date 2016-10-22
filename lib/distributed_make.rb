@@ -6,6 +6,7 @@ require "distributed_make/agents/driver"
 require "distributed_make/agents/worker"
 
 require "distributed_make/services/job_service"
+require "distributed_make/services/rule_service"
 
 require "distributed_make/utils/simple_renewer"
 
