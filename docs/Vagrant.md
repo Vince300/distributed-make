@@ -12,7 +12,7 @@ Pour utiliser cet environnement de test :
 * Installer le plugin "vagrant-hostmanager" :
 
 ```bash
-    vagrant plugin install vagrant-hostmanager
+vagrant plugin install vagrant-hostmanager
 ```
 
 * Suivre les instructions de https://github.com/devopsgroup-io/vagrant-hostmanager#passwordless-sudo pour éviter la
@@ -42,7 +42,7 @@ bin/rake vagrant destroy
 Si _vagrant-hostmanager_ est configuré correctement, les machines peuvent être contactées en utilisant les noms
 `worker1.dmake`, `worker2.dmake` etc. plutôt que leurs adresses IP.
 
-```bash
+```
 $ ping worker1.dmake
 Envoi d’une requête 'ping' sur worker1.dmake [10.20.1.11] avec 32 octets de données :
 Réponse de 10.20.1.11 : octets=32 temps<1ms TTL=64
@@ -56,4 +56,30 @@ Durée approximative des boucles en millisecondes :
     Minimum = 0ms, Maximum = 0ms, Moyenne = 0ms
 ```
 
-Le réseau privé utilisé pour les machines Vagrant est 10.20.1.0/24.
+Le réseau privé utilisé pour les machines Vagrant est 10.20.1.0/24. Par défaut l'adresse de la machine hôte est
+10.20.1.1.
+
+## Test en utilisant l'environnement Vagrant
+
+Une fois les machines démarrées et le code déployé avec Capistrano (`cap vagrant deploy`), les daemon de travail doivent
+être démarrés, avec la commande suivante :
+
+```bash
+bin/cap vagrant daemon:start
+```
+
+Depuis le dossier de développement, il est possible d'exécuter une compilation en utilisant la commande suivante :
+
+```
+bundle exec distributed-make \
+    -f spec/fixtures/premier/Makefile \   # Makefile à exécuter
+    --host 10.20.1.1                      # IP appartenant au subnet 10.20.1.0/24 pour communiquer avec les workers
+```
+
+L'état des services worker peut être vérifié en affichant les logs des machines Vagrant :
+
+```
+user@host $ bin/rake vagrant ssh worker1                  # Connexion SSH au worker 1
+vagrant@worker1.dmake $ cd ~/distributed-make/shared/logs # Accès au dossier de log
+vagrant@worker1.dmake $ tail -f worker.log                # Affichage du log (un worker/machine Vagrant)
+```

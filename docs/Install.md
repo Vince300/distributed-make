@@ -56,3 +56,11 @@ gem install bundler
 # Vérification de la version
 bundle -v # doit afficher Bundler 1.13.2 ou plus
 ```
+
+### Dépendances du projet
+
+Pour installer les dépendances, exécuter la commande :
+
+```bash
+bundle install --binstubs
+```

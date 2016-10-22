@@ -24,17 +24,16 @@
 * [Humble Little Ruby Book](https://www.dropbox.com/s/b8n41fqogjhpvxq/Humble%20Little%20Ruby%20Book.pdf?dl=0)
 * [The dRuby Book](https://www.dropbox.com/s/ju9xa9n4du0z2cj/The%20dRuby%20Book.pdf?dl=0)
 
-## Prérequis
+## Quickstart
 
-Voir {file:docs/Install.md}
+Suivre les instructions d'installation de {file:docs/Install.md} pour installer Ruby et les dépendances nécessaires.
 
-## Installation des dépendances
+Une fois les dépendances installées, exécuter `bin/yard server` pour lire la documentation complète avec liens à
+l'adresse http://localhost:8808.
 
-Installation automatisée des dépendances pour le développement :
+Puis, configurer Vagrant puis exécuter une compilation, tel que décrit dans {file:docs/Vagrant.md}).
 
-```bash
-bundle install --binstubs
-```
+L'architecture générale du système est décrite dans {file:docs/Architecture.md}.
 
 ## Tests
 
@@ -43,19 +42,3 @@ Le groupe `test` du Gemfile doit être installé (option par défaut). Les tests
 ```bash
 bin/rake test
 ```
-
-## Documentation
-
-La documentation peut être affichée grâce au serveur `yard`.
-
-```bash
-bin/yard server
-```
-
-Il suffit ensuite d'afficher l'adresse indiquée dans le navigateur (généralement http://localhost:8808).
-
-{file:docs/Architecture.md} présente l'architecture générale du système tel qu'implémenté.
-
-## Environnement de test Vagrant
-
-Voir {file:docs/Vagrant.md}
