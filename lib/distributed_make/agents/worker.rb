@@ -91,6 +91,11 @@ module DistributedMake
           end
         end
 
+        begin
+          # Exit smoothly
+          DRb.stop_service
+        rescue Interrupt => e
+        end
         logger.debug("end #{__method__.to_s}")
         return
       end
