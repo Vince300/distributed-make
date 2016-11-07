@@ -9,7 +9,7 @@ namespace :daemon do
           execute '/sbin/start-stop-daemon', '--pidfile', File.join(shared_path, 'pids', "#{worker}.pid"),
                   '--start', '--make-pidfile', '--chdir', current_path, '--user', fetch(:daemon_user), '--background',
                   '--startas', '/bin/bash', '--', '-c "exec /usr/local/rvm/bin/rvm default do bundle exec distributed-make worker --log ' +
-                    File.join(shared_path, 'log', "#{worker}.log") + ' 2>&1"'
+                    File.join(shared_path, 'log', "#{worker}.log") + ' --name "' + worker + '"' + ' 2>&1"'
         end
       end
     end
