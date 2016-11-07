@@ -7,8 +7,6 @@ module DistributedMake
   class RuleStub
     attr_reader :name
 
-    # Initializes a new instance of the RuleStub class.
-    #
     # @param [String] target the target name for this rule.
     def initialize(target)
       @name = target

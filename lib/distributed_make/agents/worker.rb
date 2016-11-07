@@ -12,8 +12,6 @@ module DistributedMake
   module Agents
     # Represents a distributed make system worker.
     class Worker < Agent
-      # Initialize a new worker agent
-      #
       # @param [String] name Name of the worker
       # @param [Logger] logger Logger instance for reporting status
       def initialize(name, logger)

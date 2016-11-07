@@ -13,8 +13,6 @@ module DistributedMake
   module Agents
     # Represents a distributed make system driver.
     class Driver < Agent
-      # Initialize a new instance of the Driver agent class.
-      #
       # @param [Logger] logger Logger instance for reporting status
       def initialize(logger)
         $LOGGER_NAME = "driver"

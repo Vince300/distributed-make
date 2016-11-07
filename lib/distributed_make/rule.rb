@@ -10,8 +10,6 @@ module DistributedMake
   class Rule < RuleStub
     attr_reader :dependencies, :commands, :defined_at
 
-    # Initializes a new instance of the Rule class.
-    #
     # @param [String] target the target name for this rule.
     # @param [Array<String>] dependencies the list of dependencies for this rule.
     # @param [Array<String>] commands the list of commands to execute as part of this rule.

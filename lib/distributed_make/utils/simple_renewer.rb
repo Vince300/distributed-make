@@ -8,6 +8,7 @@ module DistributedMake::Utils
   class SimpleRenewer
     include DRbUndumped
 
+    # @param [Integer] sec Timeout in seconds of this renewer
     def initialize(sec)
       @sec = sec
     end

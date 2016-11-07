@@ -10,8 +10,6 @@ module DistributedMake::Agents
     attr_accessor :ts
 
     protected
-    # Create a new agent.
-    #
     # @param [Logger] logger logger to use for this instance
     def initialize(logger)
       @logger = logger

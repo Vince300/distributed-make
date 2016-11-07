@@ -11,8 +11,6 @@ module DistributedMake
     attr_reader :name
     attr_accessor :content
 
-    # Create a new tree node.
-    #
     # @param [String] name Name of this node
     def initialize(name, content = nil)
       @name = name

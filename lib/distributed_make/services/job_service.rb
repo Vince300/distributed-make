@@ -14,8 +14,6 @@ module DistributedMake::Services
       @dry_run
     end
 
-    # Initialize a new instance of the JobService class.
-    #
     # @param [String] name the job's name
     # @param [Bool] dry_run `true` to enable dry-run
     # @param [Integer] period Rinda service period to use as timeout base

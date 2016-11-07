@@ -10,8 +10,6 @@ module DistributedMake
   class MakefileError < Error
     attr_reader :file, :line, :reason
 
-    # Initialize a new instance of the {DistributedMake::MakefileError} class.
-    #
     # @param [String] reason the reason this error occurred
     # @param [Fixnum] line the line at which this error occurred.
     # @param [String] file name of the file which raised this error.

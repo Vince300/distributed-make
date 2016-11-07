@@ -11,8 +11,6 @@ module DistributedMake
 class SyntaxError < Error
     attr_reader :file, :line, :column, :reason
 
-    # Initialize a new instance of the @see DistributedMake::SyntaxError class.
-    #
     # @param [String] file Name of the file that raised this error.
     # @param [Fixnum] line Line in the file at which this error occurred.
     # @param [Fixnum] column Column in the file at which this error occurred.
