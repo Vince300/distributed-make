@@ -116,7 +116,10 @@ module DistributedMake
             else
               handler = ('on_' + tuple[0].to_s + '_' + event).to_sym
               if respond_to?(handler, true) # Only call if handler is defined
-                send(handler, tuple, notifier)
+                if send(handler, tuple, notifier) == :exit
+                  # Fast exit from notifier loop
+                  break
+                end
               else
                 logger.warn("unhandled #{handler} event")
               end
@@ -159,7 +162,16 @@ module DistributedMake
           if @task_tree.content.done?
             logger.info("build job completed in #{Time.now - @started_at}s")
             notifier.cancel
+            return :exit
           end
+        elsif tuple[2] == :failed
+          # A task failed running because an external command returned non-zero
+          ts.take([:task, tuple[1], :failed])
+
+          # We should abort right now: canel the notifier and remove all tasks
+          logger.error("task #{tuple[1]} failed, aborting further compilation")
+          notifier.cancel
+          return :exit
         elsif tuple[2] == :working
           # A task is being worked on
           logger.info("task #{tuple[1]} is being processed")
@@ -167,6 +179,7 @@ module DistributedMake
           # Remove the :scheduled task
           ts.take([:task, tuple[1], :scheduled])
         end
+        return nil
       end
 
       # Task tuple delete event handler.

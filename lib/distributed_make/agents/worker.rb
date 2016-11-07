@@ -71,6 +71,7 @@ module DistributedMake
             # Just exit, Ctrl+C
             run_worker = false
           rescue DRb::DRbConnError => e
+            logger.reset
             logger.info("tuple space terminated, waiting for new tuple space to join")
           rescue RuntimeError => e
             if e.message == 'RingNotFound'
@@ -117,6 +118,9 @@ module DistributedMake
           # Find what we have to do
           commands = service(:rule).commands(rule_name) || []
 
+          # Status of executed commands
+          failed = false
+
           unless service(:job).dry_run?
             # Do the work
             commands.each do |command|
@@ -133,12 +137,15 @@ module DistributedMake
                 logger.info("success#{suffix}")
               else
                 logger.error("failure (#{$?})#{suffix}")
+                failed = true
               end
 
               unless output.empty?
                 # Log command output
                 logger.info(output)
               end
+
+              break if failed
             end
           else
             commands.each do |command|
@@ -146,11 +153,21 @@ module DistributedMake
             end
           end
 
-          # Log that we are done
-          logger.info("task #{rule_name} completed")
+          unless failed
+            # Log that we are done
+            logger.info("task #{rule_name} completed")
 
-          # We are done here
-          ts.write([:task, rule_name, :done])
+            # We are done here
+            ts.write([:task, rule_name, :done])
+          else
+            # Log that we failed
+            logger.info("task #{rule_name} failed")
+
+            # We failed
+            ts.write([:task, rule_name, :failed])
+          end
+
+          # Remove working task tuple
           ts.take([:task, rule_name, :working])
         end
         return
