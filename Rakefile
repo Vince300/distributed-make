@@ -13,9 +13,20 @@ end
 
 desc "Runs vagrant from the vagrant directory"
 task :vagrant do |task, args|
-  ARGV.shift
+  # shift everything until vagrant so we can rake --trace --smth vagrant ...
+  while ARGV.first =~ /^(-|vagrant$)/
+    break if ARGV.shift == 'vagrant'
+  end
+
   Dir.chdir 'vagrant' do
-    sh "vagrant", *ARGV
+    # Catch non-zero for vagrant ssh exit
+    begin
+      sh "vagrant", *ARGV
+    rescue StandardError => e
+      unless ARGV.first == 'ssh'
+        raise e
+      end
+    end
   end
 
   # https://stackoverflow.com/questions/3586997/how-to-pass-multiple-parameters-to-rake-task
