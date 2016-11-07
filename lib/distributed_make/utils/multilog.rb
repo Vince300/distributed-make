@@ -38,6 +38,9 @@ module DistributedMake::Utils
       @loggers = @original_loggers.dup
     end
 
+    # Handles Logger method calls in order to dispatch them to the current group.
+    #
+    # Method calls that do not specify a progname will be redirected in order to do so.
     def method_missing(name, *args, &block)
       @loggers.each do |logger|
         begin
