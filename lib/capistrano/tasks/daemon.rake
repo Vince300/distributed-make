@@ -5,7 +5,12 @@ namespace :daemon do
       within current_path do
         execute :mkdir, '-p', File.join(shared_path, 'pids')
         execute :mkdir, '-p', File.join(shared_path, 'log')
-        execute '/sbin/start-stop-daemon', '--pidfile', File.join(shared_path, 'pids', 'worker.pid'), '--start', '--make-pidfile', '--chdir', current_path, '--user', fetch(:daemon_user), '--background', '--startas', '/bin/bash', '--', '-c "exec /usr/local/rvm/bin/rvm default do bundle exec distributed-make worker --log ' + File.join(shared_path, 'log', 'worker.log') + ' 2>&1"'
+        fetch(:workers).each do |worker|
+          execute '/sbin/start-stop-daemon', '--pidfile', File.join(shared_path, 'pids', "#{worker}.pid"),
+                  '--start', '--make-pidfile', '--chdir', current_path, '--user', fetch(:daemon_user), '--background',
+                  '--startas', '/bin/bash', '--', '-c "exec /usr/local/rvm/bin/rvm default do bundle exec distributed-make worker --log ' +
+                    File.join(shared_path, 'log', "#{worker}.log") + ' 2>&1"'
+        end
       end
     end
   end
@@ -21,10 +26,12 @@ namespace :daemon do
   task :stop do
     on roles(:worker) do
       within current_path do
-        begin
-          execute '/sbin/start-stop-daemon', '--stop', '--pidfile', File.join(shared_path, 'pids', 'worker.pid')
-        ensure
-          execute :rm, '-f', File.join(shared_path, 'pids', 'worker.pid')
+        fetch(:workers).each do |worker|
+          begin
+            execute '/sbin/start-stop-daemon', '--stop', '--pidfile', File.join(shared_path, 'pids', "#{worker}.pid")
+          ensure
+            execute :rm, '-f', File.join(shared_path, 'pids', "#{worker}.pid")
+          end
         end
       end
     end
