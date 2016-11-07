@@ -79,6 +79,8 @@ Les services actuellement implémentés sont :
 
 * `:job`, type {DistributedMake::Services::JobService}, fournit des
 informations sur la tâche de compilation en cours.
+* `:log`, type {DistributedMake::Services::LogService}, fournit des
+méthodes pour accéder à l'objet de journalisation du processus pilote.
 * `:rule`, type {DistributedMake::Services::RuleService}, fournit la liste
 des commandes à exécuter pour la compilation des différentes cibles du
 Makefile.
