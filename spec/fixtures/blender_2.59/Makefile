@@ -488,542 +488,542 @@ f_111.jpg: dolphin_51.tga cube_anim_9.tga
 	composite -resize 640x480 dolphin_51.tga cube_anim_9.tga -blend 10x90 f_111.jpg
 
 cubesphere_1.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 1
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 1
 
 cubesphere_2.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 2
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 2
 
 cubesphere_3.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 3
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 3
 
 cubesphere_4.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 4
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 4
 
 cubesphere_5.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 5
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 5
 
 cubesphere_6.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 6
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 6
 
 cubesphere_7.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 7
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 7
 
 cubesphere_8.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 8
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 8
 
 cubesphere_9.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 9
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 9
 
 cubesphere_10.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 10
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 10
 
 cubesphere_11.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 11
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 11
 
 cubesphere_12.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 12
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 12
 
 cubesphere_13.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 13
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 13
 
 cubesphere_14.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 14
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 14
 
 cubesphere_15.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 15
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 15
 
 cubesphere_16.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 16
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 16
 
 cubesphere_17.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 17
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 17
 
 cubesphere_18.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 18
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 18
 
 cubesphere_19.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 19
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 19
 
 cubesphere_20.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 20
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 20
 
 cubesphere_21.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 21
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 21
 
 cubesphere_22.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 22
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 22
 
 cubesphere_23.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 23
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 23
 
 cubesphere_24.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 24
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 24
 
 cubesphere_25.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 25
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 25
 
 cubesphere_26.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 26
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 26
 
 cubesphere_27.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 27
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 27
 
 cubesphere_28.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 28
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 28
 
 cubesphere_29.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 29
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 29
 
 cubesphere_30.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 30
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 30
 
 cubesphere_31.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 31
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 31
 
 cubesphere_32.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 32
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 32
 
 cubesphere_33.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 33
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 33
 
 cubesphere_34.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 34
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 34
 
 cubesphere_35.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 35
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 35
 
 cubesphere_36.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 36
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 36
 
 cubesphere_37.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 37
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 37
 
 cubesphere_38.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 38
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 38
 
 cubesphere_39.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 39
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 39
 
 cubesphere_40.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 40
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 40
 
 cubesphere_41.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 41
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 41
 
 cubesphere_42.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 42
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 42
 
 cubesphere_43.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 43
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 43
 
 cubesphere_44.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 44
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 44
 
 cubesphere_45.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 45
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 45
 
 cubesphere_46.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 46
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 46
 
 cubesphere_47.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 47
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 47
 
 cubesphere_48.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 48
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 48
 
 cubesphere_49.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 49
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 49
 
 cubesphere_50.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 50
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 50
 
 cubesphere_51.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 51
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 51
 
 cubesphere_52.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 52
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 52
 
 cubesphere_53.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 53
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 53
 
 cubesphere_54.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 54
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 54
 
 cubesphere_55.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 55
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 55
 
 cubesphere_56.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 56
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 56
 
 cubesphere_57.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 57
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 57
 
 cubesphere_58.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 58
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 58
 
 cubesphere_59.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 59
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 59
 
 cubesphere_60.tga : cubesphere.blend
-	blender -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 60
+	blender-2.59 -b cubesphere.blend -o //cubesphere_#.tga -F TGA -f 60
 
 dolphin_1.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 1
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 1
 
 dolphin_2.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 2
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 2
 
 dolphin_3.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 3
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 3
 
 dolphin_4.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 4
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 4
 
 dolphin_5.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 5
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 5
 
 dolphin_6.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 6
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 6
 
 dolphin_7.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 7
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 7
 
 dolphin_8.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 8
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 8
 
 dolphin_9.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 9
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 9
 
 dolphin_10.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 10
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 10
 
 dolphin_11.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 11
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 11
 
 dolphin_12.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 12
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 12
 
 dolphin_13.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 13
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 13
 
 dolphin_14.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 14
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 14
 
 dolphin_15.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 15
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 15
 
 dolphin_16.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 16
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 16
 
 dolphin_17.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 17
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 17
 
 dolphin_18.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 18
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 18
 
 dolphin_19.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 19
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 19
 
 dolphin_20.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 20
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 20
 
 dolphin_21.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 21
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 21
 
 dolphin_22.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 22
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 22
 
 dolphin_23.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 23
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 23
 
 dolphin_24.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 24
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 24
 
 dolphin_25.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 25
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 25
 
 dolphin_26.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 26
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 26
 
 dolphin_27.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 27
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 27
 
 dolphin_28.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 28
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 28
 
 dolphin_29.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 29
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 29
 
 dolphin_30.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 30
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 30
 
 dolphin_31.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 31
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 31
 
 dolphin_32.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 32
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 32
 
 dolphin_33.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 33
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 33
 
 dolphin_34.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 34
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 34
 
 dolphin_35.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 35
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 35
 
 dolphin_36.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 36
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 36
 
 dolphin_37.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 37
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 37
 
 dolphin_38.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 38
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 38
 
 dolphin_39.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 39
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 39
 
 dolphin_40.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 40
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 40
 
 dolphin_41.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 41
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 41
 
 dolphin_42.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 42
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 42
 
 dolphin_43.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 43
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 43
 
 dolphin_44.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 44
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 44
 
 dolphin_45.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 45
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 45
 
 dolphin_46.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 46
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 46
 
 dolphin_47.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 47
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 47
 
 dolphin_48.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 48
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 48
 
 dolphin_49.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 49
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 49
 
 dolphin_50.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 50
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 50
 
 dolphin_51.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 51
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 51
 
 dolphin_52.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 52
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 52
 
 dolphin_53.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 53
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 53
 
 dolphin_54.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 54
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 54
 
 dolphin_55.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 55
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 55
 
 dolphin_56.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 56
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 56
 
 dolphin_57.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 57
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 57
 
 dolphin_58.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 58
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 58
 
 dolphin_59.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 59
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 59
 
 dolphin_60.tga : dolphin.blend
-	blender -b dolphin.blend -o //dolphin_#.tga -F TGA -f 60
+	blender-2.59 -b dolphin.blend -o //dolphin_#.tga -F TGA -f 60
 
 cube_anim_1.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 1
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 1
 
 cube_anim_2.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 2
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 2
 
 cube_anim_3.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 3
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 3
 
 cube_anim_4.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 4
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 4
 
 cube_anim_5.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 5
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 5
 
 cube_anim_6.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 6
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 6
 
 cube_anim_7.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 7
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 7
 
 cube_anim_8.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 8
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 8
 
 cube_anim_9.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 9
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 9
 
 cube_anim_10.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 10
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 10
 
 cube_anim_11.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 11
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 11
 
 cube_anim_12.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 12
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 12
 
 cube_anim_13.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 13
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 13
 
 cube_anim_14.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 14
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 14
 
 cube_anim_15.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 15
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 15
 
 cube_anim_16.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 16
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 16
 
 cube_anim_17.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 17
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 17
 
 cube_anim_18.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 18
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 18
 
 cube_anim_19.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 19
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 19
 
 cube_anim_20.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 20
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 20
 
 cube_anim_21.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 21
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 21
 
 cube_anim_22.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 22
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 22
 
 cube_anim_23.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 23
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 23
 
 cube_anim_24.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 24
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 24
 
 cube_anim_25.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 25
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 25
 
 cube_anim_26.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 26
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 26
 
 cube_anim_27.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 27
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 27
 
 cube_anim_28.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 28
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 28
 
 cube_anim_29.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 29
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 29
 
 cube_anim_30.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 30
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 30
 
 cube_anim_31.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 31
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 31
 
 cube_anim_32.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 32
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 32
 
 cube_anim_33.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 33
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 33
 
 cube_anim_34.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 34
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 34
 
 cube_anim_35.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 35
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 35
 
 cube_anim_36.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 36
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 36
 
 cube_anim_37.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 37
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 37
 
 cube_anim_38.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 38
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 38
 
 cube_anim_39.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 39
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 39
 
 cube_anim_40.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 40
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 40
 
 cube_anim_41.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 41
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 41
 
 cube_anim_42.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 42
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 42
 
 cube_anim_43.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 43
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 43
 
 cube_anim_44.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 44
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 44
 
 cube_anim_45.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 45
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 45
 
 cube_anim_46.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 46
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 46
 
 cube_anim_47.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 47
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 47
 
 cube_anim_48.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 48
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 48
 
 cube_anim_49.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 49
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 49
 
 cube_anim_50.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 50
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 50
 
 cube_anim_51.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 51
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 51
 
 cube_anim_52.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 52
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 52
 
 cube_anim_53.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 53
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 53
 
 cube_anim_54.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 54
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 54
 
 cube_anim_55.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 55
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 55
 
 cube_anim_56.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 56
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 56
 
 cube_anim_57.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 57
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 57
 
 cube_anim_58.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 58
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 58
 
 cube_anim_59.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 59
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 59
 
 cube_anim_60.tga : cube_anim.blend
-	blender -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 60
+	blender-2.59 -b cube_anim.blend -o //cube_anim_#.tga -F TGA -f 60
 
