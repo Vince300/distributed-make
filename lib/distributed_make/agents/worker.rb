@@ -6,6 +6,8 @@ require "distributed_make/utils/multilog"
 require "drb/drb"
 require "rinda/ring"
 
+require "tmpdir"
+
 module DistributedMake
   module Agents
     # Represents a distributed make system worker.
@@ -55,8 +57,18 @@ module DistributedMake
             logger.add_logger(service(:log).logger)
             logger.info("joined the worker pool")
 
-            # We have joined the tuple space, start processing using this agent
-            yield self
+            # Create the temporary working directory
+            Dir.mktmpdir("distributed-make") do |tmpdir|
+              # Change to this directory so tools behave as expected
+              Dir.chdir(tmpdir) do
+                # Setup the tmp dir as an instance variable
+                @working_dir = tmpdir
+                logger.debug("working directory: #{@working_dir}")
+
+                # We have joined the tuple space, start processing using this agent
+                yield self
+              end
+            end
           rescue Interrupt => e
             # Just exit, Ctrl+C
             run_worker = false
