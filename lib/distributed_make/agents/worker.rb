@@ -1,6 +1,7 @@
 require "distributed_make/base"
 require "distributed_make/agents/agent"
 require "distributed_make/utils/simple_renewer"
+require "distributed_make/utils/multilog"
 
 require "drb/drb"
 require "rinda/ring"
@@ -9,6 +10,16 @@ module DistributedMake
   module Agents
     # Represents a distributed make system worker.
     class Worker < Agent
+      # Initialize a new worker agent
+      #
+      # @param [String] name Name of the worker
+      # @param [Logger] logger Logger instance for reporting status
+      def initialize(name, logger)
+        $LOGGER_NAME = name
+        super(Utils::Multilog.new(logger))
+        self.logger.debug("worker #{name} initialized")
+      end
+
       # Run the worker agent on the given host.
       #
       # @param [String, nil] host hostname for the dRuby service
@@ -27,6 +38,9 @@ module DistributedMake
 
         while run_worker
           begin
+            # Reset the Multilog so it only points to the default logger
+            logger.reset
+
             # Locate tuple space
             join_tuple_space(Rinda::RingFinger.finger.lookup_ring_any)
             logger.info("located tuple space #{ts}")
@@ -36,6 +50,10 @@ module DistributedMake
 
             # Read the parameters for this space
             logger.debug("new tuple space period is #{service(:job).period} second(s)")
+
+            # Register the new logger
+            logger.add_logger(service(:log).logger)
+            logger.info("joined the worker pool")
 
             # We have joined the tuple space, start processing using this agent
             yield self

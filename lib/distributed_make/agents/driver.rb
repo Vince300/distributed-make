@@ -1,6 +1,7 @@
 require "distributed_make/base"
 require "distributed_make/agents/agent"
 require "distributed_make/services/job_service"
+require "distributed_make/services/log_service"
 require "distributed_make/services/rule_service"
 
 require "drb/drb"
@@ -12,6 +13,16 @@ module DistributedMake
   module Agents
     # Represents a distributed make system driver.
     class Driver < Agent
+      # Initialize a new instance of the Driver agent class.
+      #
+      # @param [Logger] logger Logger instance for reporting status
+      def initialize(logger)
+        $LOGGER_NAME = "driver"
+        # So Multilog handles adding the name
+        super(Utils::Multilog.new(logger))
+        self.logger.debug("driver initialized")
+      end
+
       # Run the driver agent on the given host.
       #
       # @param [String, nil] host hostname for the dRuby service
@@ -30,6 +41,9 @@ module DistributedMake
 
         # Register the job service
         register_service(:job, Services::JobService.new(job_name, dry_run, period))
+
+        # Register the log service (use the Logger instance, not the Multilog)
+        register_service(:log, Services::LogService.new(logger.loggers.first))
 
         # Compute Ring server addresses
         # Default: bind to 0.0.0.0

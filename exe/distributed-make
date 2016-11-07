@@ -107,8 +107,11 @@ command :worker do |c|
   c.example 'Run the worker listening on all addresses', 'distributed-make worker'
   c.example 'Run the worker listening on localhost', 'distributed-make worker --host localhost'
   c.example 'Run the worker listening on localhost, with a specific port', 'distributed-make worker --host localhost:12345'
+  c.option '--name NAME', String, 'Name of the worker instance. Defaults to worker'
   c.action do |args, options|
-    driver = DistributedMake::Agents::Worker.new(logger)
+    options.default name: 'worker'
+
+    driver = DistributedMake::Agents::Worker.new(options.name, logger)
     driver.run(options.host) do |agent|
       # Tell the agent to wait for work
       agent.process_work
