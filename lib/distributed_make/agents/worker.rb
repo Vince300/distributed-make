@@ -118,11 +118,34 @@ module DistributedMake
 
           # Find what we have to do
           commands = service(:rule).commands(rule_name) || []
-          logger.info("commands to run: #{commands.join("\n")}")
 
           unless service(:job).dry_run?
-            # Do some work
-            sleep(1.0)
+            # Do the work
+            commands.each do |command|
+              logger.info("run: #{command}")
+              output = `#{command} 2>&1` # execute verbatim command, redirect stderr
+
+              # Log command return code
+              suffix = unless output.empty? then
+                         ": "
+                       else
+                         ""
+                       end
+              if $?.success?
+                logger.info("success#{suffix}")
+              else
+                logger.error("failure (#{$?})#{suffix}")
+              end
+
+              unless output.empty?
+                # Log command output
+                logger.info(output)
+              end
+            end
+          else
+            commands.each do |command|
+              logger.info("dry-run: #{command}")
+            end
           end
 
           # Log that we are done
