@@ -1,5 +1,7 @@
 #!/bin/bash
 # This file is a provisioning script that setups required software for this project to run on a x64 jessie system.
+# Note: this shell script is self-contained, once uploaded to a host it can be run with only internet access as a
+# dependency
 
 # Fail if any command fail
 set -eo pipefail
@@ -149,7 +151,7 @@ int main(int argc, char **argv) {
 		if (i % 2 == 0) {
 			i_premier = 0;
 		} else {
-			for(j = 3 ; j < sqrt(i) ; j+=2) {
+			for(j = 3 ; j <= sqrt(i) ; j+=2) {
 				if (i % j == 0) {
 					i_premier = 0;
 					break;
@@ -162,7 +164,7 @@ int main(int argc, char **argv) {
 }
 " >/tmp/premier.c
 
-  gcc -o /usr/local/bin/premier -lm -O3 /tmp/premier.c
+  gcc -o /usr/local/bin/premier -O3 /tmp/premier.c -lm
   echo "installed premier to /usr/local/bin/premier."
 else
   echo "premier is already installed, skipping."
