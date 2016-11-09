@@ -18,7 +18,7 @@ task :vagrant do |task, args|
     break if ARGV.shift == 'vagrant'
   end
 
-  Dir.chdir 'vagrant' do
+  Dir.chdir 'machines' do
     # Catch non-zero for vagrant ssh exit
     begin
       sh "vagrant", *ARGV

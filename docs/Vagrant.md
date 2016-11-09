@@ -1,6 +1,6 @@
 # Environnement de test Vagrant
 
-Le dossier `vagrant/` contient :
+Le dossier `machines/` contient :
 
 * `Vagrantfile` : définition de machines virtuelles de test
 * `root-provision.sh` : installation des outils nécessaires sur les machines virtuelles

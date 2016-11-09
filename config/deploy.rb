@@ -13,7 +13,7 @@ set :tar_verbose, false
 
 # Vagrant directory not needed in production
 set :include_dir, %W(.rspec .git .gitignore)
-set :exclude_dir, %W(vagrant bin config log Gemfile.lock)
+set :exclude_dir, %W(machines bin config log Gemfile.lock)
 
 # Fix Bundler from different platforms (remove --deployment from default flags)
 set :bundle_flags, '--quiet'
