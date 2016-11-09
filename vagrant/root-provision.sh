@@ -100,7 +100,7 @@ fi
 
 # Install Bundler
 if ! hash bundle 2>/dev/null; then
-  gem install bundler
+  gem install bundler -v 1.13.2
 fi
 
 blender_install () {
