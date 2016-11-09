@@ -3,6 +3,7 @@ require "distributed_make/agents/agent"
 require "distributed_make/services/job_service"
 require "distributed_make/services/log_service"
 require "distributed_make/services/rule_service"
+require "distributed_make/source_error"
 
 require "drb/drb"
 require "rinda/tuplespace"
@@ -81,8 +82,12 @@ module DistributedMake
         # Reset the start time
         @started_at = nil
 
+        # Check that all required files are present in the source directory
+        check_stubs(tree)
+
         # Register the rule service
-        commands = @task_dict.collect { |key, node| [key, node.content.commands] }.to_h
+        commands = @task_dict.select { |key, node| not node.content.is_stub? }
+                             .collect { |key, node| [key, node.content.commands] }.to_h
         register_service(:rule, Services::RuleService.new(commands))
 
         # Create the notifier that detects task events
@@ -250,6 +255,26 @@ module DistributedMake
           end
 
           not rule.done?
+        end
+        return
+      end
+
+      # Check that source dependencies are present in the source directory
+      #
+      # @param [TreeNode] tree make tree
+      # @return [void]
+      def check_stubs(tree)
+        tree.each_node do |node|
+          rule = node.content
+
+          if rule.is_stub?
+            # This rule is a pure dependency, it must be available in the current working directory
+            unless File.exist? rule.name
+              raise SourceError.new(rule.name)
+            end
+          end
+
+          true # continue enumerating child nodes
         end
         return
       end
