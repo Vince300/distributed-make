@@ -48,6 +48,10 @@ command :driver do |c|
     # The name of the Makefile to process
     filename = options.f
 
+    # Initialize the driver so the Multilog is created, and substitute the logger instance
+    driver = DistributedMake::Agents::Driver.new(logger)
+    logger = driver.logger
+
     # Check wanted rule specification
     wanted_rule = nil
     if args.length > 1
@@ -83,7 +87,6 @@ command :driver do |c|
       job_name = File.dirname(File.expand_path(Dir.getwd))
 
       # Start the Makefile driver
-      driver = DistributedMake::Agents::Driver.new(logger)
       driver.run(options.host, job_name, options.dry_run, options.period) do |agent|
         # Tell the agent to start processing the current tree
         agent.make_tree(tree)
