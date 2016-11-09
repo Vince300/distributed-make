@@ -35,7 +35,7 @@ Pour exécuter cette commande en dehors du shell ouvert par OAR, faire :
 kavlan -V -j JOBID
 ```
 
-Voir le tableau sur le site de [grid5000](https://www.grid5000.fr/mediawiki/index.php/KaVLAN) pour connaître les ID et les adresses IP des VLANs.
+Voir le tableau sur le site de [grid5000](https://www.grid5000.fr/mediawiki/index.php/KaVLAN#Reserving_a_VLAN) pour connaître les ID et les adresses IP des VLANs.
 
 ###Configuration des VLANs
 
