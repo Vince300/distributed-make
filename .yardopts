@@ -1,5 +1,6 @@
 --protected
 -
 docs/Architecture.md
+docs/FileSystem.md
 docs/Install.md
 docs/Vagrant.md
