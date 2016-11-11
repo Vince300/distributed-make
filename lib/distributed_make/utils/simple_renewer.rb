@@ -1,5 +1,7 @@
 require "distributed_make/base"
 
+require "drb/drb"
+
 # Various utilities for the distributed make project.
 module DistributedMake::Utils
   # Represents a distributed tuple renewer that expires when its host is not available anymore.
