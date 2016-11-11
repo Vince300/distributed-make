@@ -13,6 +13,7 @@ require "distributed_make/utils/multilog"
 require "distributed_make/utils/simple_renewer"
 
 require "distributed_make/error"
+require "distributed_make/file_engine"
 require "distributed_make/makefile_error"
 require "distributed_make/parser"
 require "distributed_make/rule"

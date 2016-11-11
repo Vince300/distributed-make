@@ -1,4 +1,7 @@
 require "distributed_make/base"
+require "distributed_make/file_engine"
+
+require "uri"
 
 module DistributedMake::Agents
   # Base class for a distributed make agent.
@@ -8,6 +11,9 @@ module DistributedMake::Agents
 
     # @return [Rinda::TupleSpace] the tuple space in use by this agent
     attr_accessor :ts
+
+    # @return [DistributedMake::FileEngine] file engine managing the shared files
+    attr_accessor :file_engine
 
     protected
     # @param [Logger] logger logger to use for this instance
@@ -66,6 +72,26 @@ module DistributedMake::Agents
 
       logger.info("started DRb at #{DRb.uri}")
       return
+    end
+
+    # Get the host identification string of the current agent. Only valid once DRb service has been started.
+    def host
+      URI.parse(DRb.uri).host
+    end
+
+    # Setups the file engine to manage file transfers when executing the given block
+    #
+    # @param [Integer] period Tuple space period to use for the file engine
+    def with_file_engine(period)
+      # Create the file engine
+      @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period)
+
+      begin
+        file_engine.start
+        yield
+      ensure
+        file_engine.stop
+      end
     end
   end
 end
