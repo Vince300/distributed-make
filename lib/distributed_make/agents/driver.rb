@@ -88,7 +88,9 @@ module DistributedMake
         # Register the rule service
         commands = @task_dict.select { |key, node| not node.content.is_stub? }
                              .collect { |key, node| [key, node.content.commands] }.to_h
-        register_service(:rule, Services::RuleService.new(commands))
+        dependencies = @task_dict.select { |key, node| not node.content.is_stub? }
+                                 .collect { |key, node| [key, node.content.dependencies] }.to_h
+        register_service(:rule, Services::RuleService.new(commands, dependencies))
 
         # Create the notifier that detects task events
         done_notifier = ts.notify(nil, [:task, nil, nil])

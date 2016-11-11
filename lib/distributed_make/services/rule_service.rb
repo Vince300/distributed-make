@@ -14,9 +14,22 @@ module DistributedMake::Services
       @commands[rule_name]
     end
 
-    # @param [Hash<String, [Array<String>, nil]>] commands hash of command definitions (or nil for stubs)
-    def initialize(commands)
+    # Get the dependencies for the given rule.
+    #
+    # @param [String] rule_name name of the rule
+    def dependencies(rule_name)
+      unless @dependencies.has_key? rule_name
+        raise "rule #{rule_name} does not exist"
+      end
+
+      @dependencies[rule_name]
+    end
+
+    # @param [Hash<String, [Array<String>]>] commands hash of command definitions
+    # @param [Hash<String, [Array<String>]>] dependencies hash of dependency definitions
+    def initialize(commands, dependencies)
       @commands = commands
+      @dependencies = dependencies
     end
   end
 end
