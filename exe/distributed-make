@@ -8,6 +8,9 @@ require "logger"
 $LOAD_PATH.unshift(File.expand_path(File.join(__FILE__, "../../lib")))
 require "distributed_make"
 
+# Path to this script
+$ENTRY_POINT = File.expand_path($0)
+
 # Initialize logger
 logger = Logger.new(STDOUT)
 
@@ -119,6 +122,15 @@ command :worker do |c|
       # Tell the agent to wait for work
       agent.process_work
     end
+  end
+end
+
+command :fileserver do |c|
+  c.syntax = 'distributed-make fileserver'
+  c.summary = 'Starts the distributed file server subprocess'
+  c.description = 'This command is intended for internal use.'
+  c.action do |args, options|
+    DistributedMake::Agents::FileServer.run
   end
 end
 

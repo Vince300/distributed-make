@@ -117,9 +117,7 @@ module DistributedMake
           ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(service(:job).period))
 
           # Fetch all dependencies
-          service(:rule).dependencies(rule_name).each do |dep|
-            file_engine.get(dep)
-          end
+          service(:rule).dependencies(rule_name).each(&:get)
 
           # Find what we have to do
           commands = service(:rule).commands(rule_name)
@@ -165,11 +163,11 @@ module DistributedMake
 
             # Handle rules that do not generate anything
             done_flag = :done
-            unless file_engine.available? rule_name
+            unless available? rule_name
               done_flag = :phony
             else
               # Publish the output file
-              file_engine.publish(rule_name)
+              publish(rule_name)
             end
 
             # We are done here

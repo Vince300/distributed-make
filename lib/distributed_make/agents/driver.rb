@@ -152,7 +152,7 @@ module DistributedMake
 
           # If the task is done, fetch the produced file using the engine
           if tuple[2] == :done
-            file_engine.get(tuple[1])
+            get(tuple[1])
           end
 
           # This task is now done
