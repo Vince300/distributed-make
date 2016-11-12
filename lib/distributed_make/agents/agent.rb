@@ -3,6 +3,8 @@ require "distributed_make/file_engine"
 
 require "uri"
 
+require "eventmachine"
+
 module DistributedMake::Agents
   # Base class for a distributed make agent.
   class Agent
@@ -79,19 +81,30 @@ module DistributedMake::Agents
       URI.parse(DRb.uri).host
     end
 
+    # Starts the event machine, initializing the file engine
+    def go_block(period, &block)
+      EventMachine.run_block do
+        start_file_engine(period)
+        block.call(self)
+      end
+    end
+
+    # Starts the event machine, initializing the file engine
+    def go(period, &block)
+      EventMachine.run do
+        start_file_engine(period)
+        block.call(self)
+      end
+    end
+
+    protected
     # Setups the file engine to manage file transfers when executing the given block
     #
     # @param [Integer] period Tuple space period to use for the file engine
-    def with_file_engine(period)
+    def start_file_engine(period)
       # Create the file engine
       @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period)
-
-      begin
-        file_engine.start
-        yield
-      ensure
-        file_engine.stop
-      end
+      file_engine.start
     end
   end
 end

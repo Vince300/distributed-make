@@ -48,4 +48,7 @@ Gem::Specification.new do |spec|
 
   # Command line interface
   spec.add_runtime_dependency 'commander', '~>4.4'
+
+  # EventMachine for file servers
+  spec.add_runtime_dependency 'eventmachine', '~>1.2'
 end

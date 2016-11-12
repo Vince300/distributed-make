@@ -29,7 +29,7 @@ module DistributedMake
       # @param [Bool] dry_run `true` to enable dry-run
       # @param [Fixnum] period period of the main tuple space
       # @yieldparam [Driver] agent running driver agent
-      def run(host = nil, job_name = nil, dry_run = false, period = 5)
+      def run(host = nil, job_name = nil, dry_run = false, period = 5, &block)
         logger.debug("begin #{__method__.to_s}")
 
         # Start DRb service
@@ -60,10 +60,8 @@ module DistributedMake
         logger.info("started ring server")
 
         begin
-          with_file_engine(period) do
-            # Now the agent is ready, delegate functionnality to block
-            yield self
-          end
+          # Now the agent is ready, delegate functionnality to block
+          go_block(period, &block)
         rescue Interrupt => e
           logger.info("exiting")
         end
@@ -152,30 +150,31 @@ module DistributedMake
 
           # If the task is done, fetch the produced file using the engine
           if tuple[2] == :done
-            file_engine.get(tuple[1])
-          end
+            file_engine.get(tuple[1]).callback do
+              # This task is now done
+              node = @task_dict[tuple[1]]
+              rule_done(node.content)
 
-          # This task is now done
-          node = @task_dict[tuple[1]]
-          rule_done(node.content)
+              # Walk parents of this node to process further rules
+              node.parents.each do |parent|
+                unless parent.content.processing? or parent.content.done?
+                  # The parent task is not being processed
+                  if parent.children.all? { |child| child.content.done? }
+                    # All children of this parent are done, process parent
+                    logger.debug("task #{parent.content.name} is ready to be processed")
+                    add_rule(parent.content)
+                  end
+                end
+              end
 
-          # Walk parents of this node to process further rules
-          node.parents.each do |parent|
-            unless parent.content.processing? or parent.content.done?
-              # The parent task is not being processed
-              if parent.children.all? { |child| child.content.done? }
-                # All children of this parent are done, process parent
-                logger.debug("task #{parent.content.name} is ready to be processed")
-                add_rule(parent.content)
+              # Root rule completed?
+              if @task_tree.content.done?
+                logger.info("build job completed in #{Time.now - @started_at}s")
+                notifier.cancel
               end
             end
-          end
-
-          # Root rule completed?
-          if @task_tree.content.done?
-            logger.info("build job completed in #{Time.now - @started_at}s")
-            notifier.cancel
-            return :exit
+          else
+            fail ":phony not yet supported!"
           end
         elsif tuple[2] == :failed
           # A task failed running because an external command returned non-zero

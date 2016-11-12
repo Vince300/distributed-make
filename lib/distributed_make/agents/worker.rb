@@ -8,6 +8,8 @@ require "rinda/ring"
 
 require "tmpdir"
 
+require "eventmachine"
+
 module DistributedMake
   module Agents
     # Represents a distributed make system worker.
@@ -25,7 +27,7 @@ module DistributedMake
       # @param [String, nil] host hostname for the dRuby service
       # @yieldparam [Worker] agent running driver agent
       # @return [void]
-      def run(host = nil)
+      def run(host = nil, &block)
         logger.debug("begin #{__method__.to_s}")
 
         # Start DRb service
@@ -62,18 +64,16 @@ module DistributedMake
                 # Setup the tmp dir as an instance variable
                 logger.debug("working directory: #{tmpdir}")
 
-                with_file_engine(service(:job).period) do
-                  # We have joined the tuple space, start processing using this agent
-                  yield self
-                end
+                # We have joined the tuple space, start processing using this agent
+                go(service(:job).period, &block)
               end
             end
+
+            logger.reset
+            logger.info("tuple space terminated, waiting for new tuple space to join")
           rescue Interrupt => e
             # Just exit, Ctrl+C
             run_worker = false
-          rescue DRb::DRbConnError => e
-            logger.reset
-            logger.info("tuple space terminated, waiting for new tuple space to join")
           rescue RuntimeError => e
             if e.message == 'RingNotFound'
               # The Ring was not found, notify the user (once) about retrying
@@ -105,22 +105,49 @@ module DistributedMake
       # @return [void]
       def process_work
         # Forever
-        while true
+        EventMachine::Iterator.new(proc { }, 1).each do |prc, iter|
+          # Once the task processing completed, proceed to get the next task
+          EventMachine.defer(method(:take_tuple), proc do |tuple|
+            if tuple
+              process_task(tuple) do
+                iter.next
+              end
+            else
+              # No tuple to process, driver process left
+              EventMachine.stop
+              iter.next
+            end
+          end)
+        end
+        return
+      end
+
+      protected
+      def take_tuple
+        begin
           # Take a task to do
-          tuple = ts.take([:task, nil, :todo])
-          rule_name = tuple[1]
+          ts.take([:task, nil, :todo])
+        rescue DRb::DRbConnError => e
+          return nil
+        end
+      end
 
-          # Notify
-          logger.info("got task #{rule_name}")
+      def process_task(tuple)
+        rule_name = tuple[1]
 
-          # Tell tuple space we are processing, watching for timeout
-          ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(service(:job).period))
+        # Notify
+        logger.info("got task #{rule_name}")
 
-          # Fetch all dependencies
-          service(:rule).dependencies(rule_name).each do |dep|
-            file_engine.get(dep)
+        # Tell tuple space we are processing, watching for timeout
+        ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(service(:job).period))
+
+        # Fetch all dependencies
+        # TODO: Configurable concurrency
+        EventMachine::Iterator.new(service(:rule).dependencies(rule_name), 4).each(proc do |dep, iter|
+          file_engine.get(dep).callback do
+            iter.next
           end
-
+        end, proc do
           # Find what we have to do
           commands = service(:rule).commands(rule_name)
 
@@ -184,8 +211,10 @@ module DistributedMake
 
           # Remove working task tuple
           ts.take([:task, rule_name, :working])
-        end
-        return
+
+          # We can now continue
+          yield
+        end)
       end
     end
   end
