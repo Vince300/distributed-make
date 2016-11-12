@@ -88,10 +88,9 @@ module DistributedMake
         check_stubs(tree)
 
         # Register the rule service
-        commands = @task_dict.select { |key, node| not node.content.is_stub? }
-                             .collect { |key, node| [key, node.content.commands] }.to_h
-        dependencies = @task_dict.select { |key, node| not node.content.is_stub? }
-                                 .collect { |key, node| [key, node.content.dependencies] }.to_h
+        non_stubs = @task_dict.select { |key, node| not node.content.is_stub? }.to_a
+        commands = non_stubs.collect { |key, node| [key, node.content.commands] }.to_h
+        dependencies = non_stubs.collect { |key, node| [key, node.content.dependencies] }.to_h
         register_service(:rule, Services::RuleService.new(commands, dependencies))
 
         # Create the notifier that detects task events
