@@ -8,7 +8,7 @@ namespace :examples do
   desc "Clean example files from spec/fixtures"
   task :clean do
     Dir.glob("spec/fixtures/**/*").each do |file|
-      FileUtils.rm file if file.match /list\d*\.txt|blender_2\.49\/cube_anim.blend|frame_\d+\.png|cube\.mpg|\.tga|\.jpg|out\.avi|test\.txt/
+      FileUtils.rm file if file.match /list\d*\.txt|blender_2\.49(-recurse)?\/cube_anim.blend|frame_\d+\.png|cube\.mpg|\.tga|\.jpg|out\.avi|test\.txt/
     end
   end
 end
