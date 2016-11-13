@@ -86,11 +86,18 @@ module DistributedMake::Agents
       # Create the file engine
       @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period)
 
+      # Publish the initial files inside the working directory
+      dir = Dir.pwd
+      pd = Pathname.new(dir)
+      Dir.glob(File.join(dir, '**')).each do |match|
+        file_engine.publish(Pathname.new(match).relative_path_from(pd))
+      end
+
+      # Invoke the callback
       begin
-        file_engine.start
         yield
       ensure
-        file_engine.stop
+        @file_engine = nil
       end
     end
   end
