@@ -1,9 +1,7 @@
 namespace :daemon do
   desc "Starts the worker daemon"
   task :start do
-    on vagrant_hosts do |host|
-      execute :mkdir, "-p", release_path
-
+    on hosts do |host|
       within current_path do
         execute :mkdir, '-p', File.join(shared_path, 'pids')
         execute :mkdir, '-p', File.join(shared_path, 'log')
@@ -19,9 +17,7 @@ namespace :daemon do
 
   desc "Stops the worker daemon"
   task :stop do
-    on vagrant_hosts do
-      execute :mkdir, "-p", release_path
-
+    on hosts do
       within current_path do
         workers.each do |worker|
           begin
