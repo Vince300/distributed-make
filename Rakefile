@@ -13,6 +13,13 @@ namespace :examples do
   end
 end
 
+desc "daemon:stop deploy daemon:start"
+task :d do
+  %w{daemon:stop deploy daemon:start}.each do |task|
+    Rake::Task[task].invoke
+  end
+end
+
 # In a development environment, load RSpec and set it as the default task
 begin
   require "rspec/core/rake_task"
