@@ -33,8 +33,8 @@ describe DistributedMake::TreeBuilder do
     expect(node.content.defined_at).to eq 1
 
     # Dependency node checking
-    expect(node['source.c']).not_to be_nil
-    node = node['source.c']
+    expect(node.children.first).not_to be_nil
+    node = node.children.first
 
     expect(node.name).to eq 'source.c'
     expect(node.content).to be_a DistributedMake::RuleStub

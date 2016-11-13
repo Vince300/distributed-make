@@ -125,17 +125,4 @@ describe DistributedMake::TreeNode do
     expect(child.is_leaf?).to_not be_truthy
     expect(leaf.is_leaf?).to be_truthy
   end
-
-  it "allows node access through names" do
-    root = DistributedMake::TreeNode.new("root")
-    a = DistributedMake::TreeNode.new("a")
-    b = DistributedMake::TreeNode.new("b")
-
-    root << a
-    root << b
-
-    expect(root["a"]).to eq a
-    expect(root["b"]).to eq b
-    expect(root["c"]).to be_nil
-  end
 end
