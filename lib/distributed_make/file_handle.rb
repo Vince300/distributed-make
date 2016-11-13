@@ -7,9 +7,14 @@ module DistributedMake
     attr_reader :file
     attr_reader :file_engine
 
-    def initialize(file, file_engine)
+    def worker?
+      !!@worker
+    end
+
+    def initialize(file, file_engine, worker)
       @file = file
       @file_engine = file_engine
+      @worker = worker
     end
 
     def get_data(remote_host)

@@ -60,7 +60,7 @@ module DistributedMake
         logger.info("started ring server")
 
         begin
-          with_file_engine(period) do
+          with_file_engine(period, false) do
             # Now the agent is ready, delegate functionnality to block
             yield self
           end

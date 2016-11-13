@@ -82,9 +82,10 @@ module DistributedMake::Agents
     # Setups the file engine to manage file transfers when executing the given block
     #
     # @param [Integer] period Tuple space period to use for the file engine
-    def with_file_engine(period)
+    # @param [Boolean] worker true if this agent is a worker
+    def with_file_engine(period, worker)
       # Create the file engine
-      @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period)
+      @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period, worker)
 
       # Publish the initial files inside the working directory
       dir = Dir.pwd

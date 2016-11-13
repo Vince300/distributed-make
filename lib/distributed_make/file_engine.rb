@@ -30,12 +30,14 @@ module DistributedMake
     # @param [String] dir Working directory to manage
     # @param [Logger] logger Logger to report events to
     # @param [Integer] period Tuple space period
-    def initialize(host, ts, dir, logger, period)
+    # @param [Boolean] worker true if this engine is running in a worker
+    def initialize(host, ts, dir, logger, period, worker)
       @host = host
       @ts = ts
       @dir = dir
       @logger = logger
       @period = period
+      @worker = worker
       @published_files = {}
     end
 
@@ -56,10 +58,17 @@ module DistributedMake
       loop do
         # Find the file on the pool
         target_tuple = begin
-          ts.read([:file, file, host, nil], 0)
+          ts.read([:file, file, host, nil], 0) # Try to find the file on the same host
         rescue Rinda::RequestExpiredError
-          ts.read_all([:file, file, nil, nil]).sample ||
+          all_tuples = ts.read_all([:file, file, nil, nil])
+
+          # Prefer loading the workers for file transfers instead of the driver
+          if all_tuples.empty?
             ts.read([:file, file, nil, nil])
+          else
+            all_tuples.select { |t| t[3].worker? }.sample ||
+              all_tuples.sample
+          end
         end
 
         # Connection properties
@@ -85,7 +94,7 @@ module DistributedMake
       unless @published_files[file]
         logger.debug("publishing #{file}")
 
-        handle = FileHandle.new(file, self)
+        handle = FileHandle.new(file, self, @worker)
         @published_files[file] = handle # Keep the reference to the handle so the GC doesn't collect the object
         ts.write([:file, file, host, handle], Utils::SimpleRenewer.new(period))
       end

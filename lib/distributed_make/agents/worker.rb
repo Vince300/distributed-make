@@ -62,7 +62,7 @@ module DistributedMake
                 # Setup the tmp dir as an instance variable
                 logger.debug("working directory: #{tmpdir}")
 
-                with_file_engine(service(:job).period) do
+                with_file_engine(service(:job).period, true) do
                   # We have joined the tuple space, start processing using this agent
                   yield self
                 end
