@@ -87,6 +87,12 @@ module DistributedMake
         # Check that all required files are present in the source directory
         check_stubs(tree)
 
+        # If the target rule already exists, there is nothing to do
+        if tree.content.done?
+          logger.info("nothing to be done")
+          return
+        end
+
         # Register the rule service
         non_stubs = @task_dict.select { |key, node| not node.content.is_stub? }.to_a
         commands = non_stubs.collect { |key, node| [key, node.content.commands] }.to_h
@@ -283,6 +289,10 @@ module DistributedMake
             unless file_engine.available? rule.name
               raise SourceError.new(rule.name)
             end
+          end
+
+          if file_engine.available? rule.name
+            rule.done = true
           end
 
           true # continue enumerating child nodes
