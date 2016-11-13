@@ -63,6 +63,7 @@ apt_get_require convert ImageMagick
 apt_get_require unzip
 apt_get_require ffmpeg
 apt_get_require bc
+apt_get_require avconv libav-tools
 
 # Use gawk as the testing tool for ruby dependencies
 apt_get_require gawk "gawk g++ libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgmp-dev libgdbm-dev libncurses5-dev automake libtool bison pkg-config libffi-dev"
