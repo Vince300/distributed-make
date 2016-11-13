@@ -1,10 +1,7 @@
 require "distributed_make/utils/simple_renewer"
 require "distributed_make/file_handle"
 
-require "thread"
-require "socket"
-require "resolv"
-
+require "fileutils"
 require "drb/drb"
 
 module DistributedMake
@@ -74,18 +71,25 @@ module DistributedMake
         remote_host = target_tuple[2]
         agent = target_tuple[3]
 
-        # Download everything from socket to local file
-        started_at = Time.now
-        File.open(File.join(dir, file), "wb") do |output|
-          agent.get_data(host) do |data|
-            output.write(data)
+        if remote_host == host
+          # We are on the same host, hardlink
+          FileUtils.ln(agent.file, File.join(dir, file))
+
+          logger.info("hardlinked #{file}")
+        else
+          # Download everything from socket to local file
+          started_at = Time.now
+          File.open(File.join(dir, file), "wb") do |output|
+            agent.get_data(host) do |data|
+              output.write(data)
+            end
           end
+
+          ended_at = Time.now
+          speed = File.size(file) / (ended_at - started_at)
+
+          logger.info("downloaded #{file} from #{remote_host} in #{ended_at - started_at}s (#{speed / 1024} kB/s)")
         end
-
-        ended_at = Time.now
-        speed = File.size(file) / (ended_at - started_at)
-
-        logger.info("downloaded #{file} from #{remote_host} in #{ended_at - started_at}s (#{speed / 1024} kB/s)")
 
         return file
       end
