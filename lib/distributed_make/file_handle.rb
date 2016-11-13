@@ -12,6 +12,16 @@ module DistributedMake
 
     def unbuffered_write(data)
       @block.call(data)
+      return data.length
+    end
+
+    def self.open(*args)
+      b = BlockWriter.new(*args)
+      begin
+        yield(b)
+      ensure
+        b.close
+      end
     end
   end
 
@@ -37,7 +47,9 @@ module DistributedMake
 
       # Dump the whole file to the given block
       File.open(File.join(file_engine.dir, file), "rb") do |input|
-        IO.copy_stream(input, BlockWriter.new(block))
+        BlockWriter.open(block) do |bl|
+          IO.copy_stream(input, bl)
+        end
       end
 
       return
