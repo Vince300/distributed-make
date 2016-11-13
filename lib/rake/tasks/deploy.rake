@@ -15,6 +15,9 @@ task :deploy do |task, args|
       end
     end
 
+    execute :mkdir, "-p", bundler_path
+    execute :ln, "-s", bundler_path, File.join(current_path, ".bundle") 
+
     within current_path do
       # Bundle install
       execute "/usr/local/rvm/bin/rvm", "default", "do", "bundle", "install",

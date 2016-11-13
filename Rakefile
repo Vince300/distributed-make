@@ -73,6 +73,10 @@ def shared_path
   File.join(release_path, 'shared')
 end
 
+def bundler_path
+  File.join(release_path, 'bundle')
+end
+
 def workers
   $config['workers']
 end
