@@ -76,13 +76,17 @@ module DistributedMake
         agent = target_tuple[3]
 
         # Download everything from socket to local file
+        started_at = Time.now
         File.open(File.join(dir, file), "wb") do |output|
           agent.get_data(host) do |data|
             output.write(data)
           end
         end
 
-        logger.info("completed download of #{file} from #{remote_host}")
+        ended_at = Time.now
+        speed = File.size(file) / (ended_at - started_at)
+
+        logger.info("downloaded #{file} from #{remote_host} in #{ended_at - started_at}s (#{speed / 1024} kB/s)")
 
         return file
       end

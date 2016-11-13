@@ -49,4 +49,7 @@ Gem::Specification.new do |spec|
 
   # Command line interface
   spec.add_runtime_dependency 'commander', '~>4.4'
+
+  # File transfer
+  spec.add_runtime_dependency 'io-like', '~>0.3'
 end
