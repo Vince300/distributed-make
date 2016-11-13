@@ -1,4 +1,5 @@
 ---
 release_path: /home/vagrant/distributed-make
 workers:
-  - worker
+  - A
+  - B
