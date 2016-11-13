@@ -5,22 +5,70 @@ require "thread"
 require "socket"
 require "resolv"
 
+require "drb/drb"
+
 module DistributedMake
+  class FileAgent
+    include DRbUndumped
+
+    attr_reader :file
+    attr_reader :file_engine
+
+    def initialize(file, file_engine)
+      @file = file
+      @file_engine = file_engine
+    end
+
+    def reserve_slot(remote_host)
+      server = TCPServer.new(file_engine.host, 0)
+      logger.info("#{remote_host} requested #{file}, serving now on #{server.addr[1]}")
+
+      Thread.start do
+        begin
+          logger.info("waiting for connection from #{remote_host} for #{file}")
+          # Accept the incoming connection
+          sock = server.accept
+          logger.info("accepted connection from #{remote_host}:#{sock.peeraddr[2]} for #{file}")
+
+          # Dump the whole file to the socket
+          File.open(File.join(dir, file), "rb") do |input|
+            IO.copy_stream(input, sock)
+          end
+
+          # Close the socket
+          sock.close
+        rescue Error => e
+          logger.fatal(e)
+        ensure
+          server.close
+        end
+      end
+
+      # Return the server port
+      server.addr[1]
+    end
+
+    private
+    def logger
+      file_engine.logger
+    end
+  end
+
   class FileEngine
     # @return [String] Hostname of the current engine
-    attr_accessor :host
+    attr_reader :host
 
     # @return [Rinda::TupleSpace] Tuple space to support file sharing
-    attr_accessor :ts
+    attr_reader :ts
 
     # @return [String] Absolute path to the working directory managed by this instance
-    attr_accessor :dir
+    attr_reader :dir
 
     # @return [Logger] Logger to report events to
-    attr_accessor :logger
+    attr_reader :logger
 
     # @return [Integer] Tuple space period
-    attr_accessor :period
+    attr_reader :period
 
     # @param [String] host Hostname to use for the TCP server
     # @param [Rinda::TupleSpace] ts Tuple space to support file sharing
@@ -55,16 +103,21 @@ module DistributedMake
         target_tuple = begin
           ts.read([:file, file, host, nil], 0)
         rescue Rinda::RequestExpiredError
-          ts.read([:file, file, nil, nil])
+          ts.read_all([:file, file, nil, nil]).sample ||
+            ts.read([:file, file, nil, nil])
         end
 
-        # Connect to the host dispatch
+        # Connection properties
         remote_host = target_tuple[2]
-        remote_port = target_tuple[3]
+        agent = target_tuple[3]
+
+        # Get a download slot to connect to
+        remote_port = agent.reserve_slot(host)
+
         tries = 0
 
         s = begin
-          TCPSocket.new(remote_host, remote_port)
+          TCPSocket.open(remote_host, remote_port)
         rescue Errno::ECONNREFUSED
           tries = tries + 1
 
@@ -82,40 +135,17 @@ module DistributedMake
           # space, so we will try to fetch the file from another host
           redo
         else
-          logger.info("connected to dispatch server #{remote_host}:#{remote_port}")
+          logger.info("connected to download slot at #{remote_host}:#{remote_port}")
         end
 
-        # Send the request
-        Marshal.dump([:remote, file], s)
-
-        # Wait for the response
-        response = Marshal.load(s)
-
-        if response.is_a? Array
-          case response[0]
-            when :connect
-              logger.info("downloading #{file} from #{remote_host}")
-
-              # Connect to file serving port
-              fs = TCPSocket.new(remote_host, response[1])
-
-              # Download everything from socket to local file
-              File.open(File.join(dir, file), "wb") do |output|
-                IO.copy_stream(fs, output)
-              end
-
-              # Close socket
-              fs.close
-
-              logger.info("completed download of #{file} from #{remote_host}")
-            when :error
-              fail "failed to get file from #{remote_host}: #{response[1]}"
-          end
-        else
-          fail "unexpected response from dispatch server"
+        # Download everything from socket to local file
+        File.open(File.join(dir, file), "wb") do |output|
+          IO.copy_stream(s, output)
         end
 
-        # We are done, close the dispatch socket
+        logger.info("completed download of #{file} from #{remote_host}")
+
+        # Close socket
         s.close
 
         return file
@@ -125,27 +155,14 @@ module DistributedMake
     # Starts the file engine
     # @return [void]
     def start
-      @run_dispatcher = true
-
-      # Start the dispatcher TCP socket
-      dispatcher_server = TCPServer.new(host, 0)
-      logger.info("file server running on #{host}:#{dispatcher_server.addr[1]}")
-
-      # Now we have a port, publish all files on the tuple space using the renewer
+      # Publish all files originally in the working directory
       publish_all
-
-      # Start the thread that accepts connections for the server
-      @dispatcher_thread = Thread.start(dispatcher_server, &method(:dispatcher_callback))
       return
     end
 
     # Stops the file engine
     # @return [void]
     def stop
-      @run_dispatcher = false
-      @dispatcher_thread.join
-      @dispatcher_thread = nil
-      logger.debug("stopped file dispatcher")
       return
     end
 
@@ -153,7 +170,7 @@ module DistributedMake
       unless @published_files[file]
         logger.debug("publishing #{file}")
         @published_files[file] = true
-        ts.write([:file, file, host, @dispatcher_server.addr[1]], Utils::SimpleRenewer.new(period))
+        ts.write([:file, file, host, FileAgent.new(file, self)], Utils::SimpleRenewer.new(period))
       end
     end
 
@@ -163,79 +180,6 @@ module DistributedMake
       Dir.glob(File.join(dir, '**')).each do |match|
         publish Pathname.new(match).relative_path_from(pd)
       end
-    end
-
-    def dispatcher_callback(dispatcher_server)
-      # Start accepting clients
-      while @run_dispatcher do
-        begin
-          # Start a thread handling the client data
-          Thread.start(dispatcher_server.accept_nonblock, &method(:client_callback))
-        rescue IO::EWOULDBLOCKWaitReadable, IO::WaitReadable, Errno::EINTR
-          # 0.5s timeout means we will at most wait 500ms to exit the dispatcher
-          # when FileEngine#stop is called
-          IO.select([dispatcher_server], [], [], 0.5)
-          retry if @run_dispatcher
-        end
-      end
-
-      logger.debug("stopping file server")
-
-      # Terminate the server
-      dispatcher_server.close
-    end
-
-    def client_callback(client)
-      caddr = "#{client.peeraddr[1]}:#{client.peeraddr[2]}"
-      logger.info("accepted client from #{caddr}")
-      loop do
-        begin
-          # Load incoming message
-          mesg = Marshal.load(client)
-
-          # Handle message
-          if mesg.is_a? Array
-            case mesg[0]
-              when :remote
-                logger.info("#{caddr} requested #{mesg[1]}")
-
-                # Launch a new TCP server
-                srv = TCPServer.new(host, 0)
-
-                # Send out server port
-                Marshal.dump([:connect, srv.addr[1]], client)
-
-                # Wait for the file to be served
-                serve_callback(srv.accept, mesg[1])
-
-                # Close the server
-                srv.close
-
-                # Stop dispatching to this client
-                break
-              else
-                logger.warn("unsupported message #{mesg[0]} from #{caddr}")
-            end
-          else
-            # Abort on dubious clients
-            logger.error("unexpected message #{mesg} from #{caddr}")
-            break
-          end
-        rescue StandardError => e
-          logger.error("error receiving message from #{caddr}: #{e}")
-          break
-        end
-      end
-
-      client.close
-    end
-
-    def serve_callback(sock, file)
-      File.open(File.join(dir, file), "rb") do |input|
-        IO.copy_stream(input, sock)
-      end
-
-      sock.close
     end
   end
 end
