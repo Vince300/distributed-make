@@ -60,8 +60,10 @@ module DistributedMake
         logger.info("started ring server")
 
         begin
-          # Now the agent is ready, delegate functionnality to block
-          yield self
+          with_file_engine(period) do
+            # Now the agent is ready, delegate functionnality to block
+            yield self
+          end
         rescue Interrupt => e
           logger.info("exiting")
         end
@@ -86,10 +88,9 @@ module DistributedMake
         check_stubs(tree)
 
         # Register the rule service
-        commands = @task_dict.select { |key, node| not node.content.is_stub? }
-                             .collect { |key, node| [key, node.content.commands] }.to_h
-        dependencies = @task_dict.select { |key, node| not node.content.is_stub? }
-                                 .collect { |key, node| [key, node.content.dependencies] }.to_h
+        non_stubs = @task_dict.select { |key, node| not node.content.is_stub? }.to_a
+        commands = non_stubs.collect { |key, node| [key, node.content.commands] }.to_h
+        dependencies = non_stubs.collect { |key, node| [key, node.content.dependencies] }.to_h
         register_service(:rule, Services::RuleService.new(commands, dependencies))
 
         # Create the notifier that detects task events
@@ -145,9 +146,14 @@ module DistributedMake
       # @param [Array<Symbol, String, Symbol>] tuple task tuple
       # @param [Rinda::NotifyTemplateEntry] notifier notifier which is the source for this event
       def on_task_write(tuple, notifier)
-        if tuple[2] == :done
+        if [:done, :phony].include? tuple[2]
           # A task is completed
-          ts.take([:task, tuple[1], :done])
+          ts.take([:task, tuple[1], tuple[2]])
+
+          # If the task is done, fetch the produced file using the engine
+          if tuple[2] == :done
+            file_engine.get(tuple[1])
+          end
 
           # This task is now done
           node = @task_dict[tuple[1]]
@@ -271,7 +277,7 @@ module DistributedMake
 
           if rule.is_stub?
             # This rule is a pure dependency, it must be available in the current working directory
-            unless File.exist? rule.name
+            unless file_engine.available? rule.name
               raise SourceError.new(rule.name)
             end
           end

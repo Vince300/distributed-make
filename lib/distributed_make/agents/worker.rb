@@ -60,11 +60,12 @@ module DistributedMake
               # Change to this directory so tools behave as expected
               Dir.chdir(tmpdir) do
                 # Setup the tmp dir as an instance variable
-                @working_dir = tmpdir
-                logger.debug("working directory: #{@working_dir}")
+                logger.debug("working directory: #{tmpdir}")
 
-                # We have joined the tuple space, start processing using this agent
-                yield self
+                with_file_engine(service(:job).period) do
+                  # We have joined the tuple space, start processing using this agent
+                  yield self
+                end
               end
             end
           rescue Interrupt => e
@@ -113,10 +114,15 @@ module DistributedMake
           logger.info("got task #{rule_name}")
 
           # Tell tuple space we are processing, watching for timeout
-          ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(2 * service(:job).period))
+          ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(service(:job).period))
+
+          # Fetch all dependencies
+          service(:rule).dependencies(rule_name).each do |dep|
+            file_engine.get(dep)
+          end
 
           # Find what we have to do
-          commands = service(:rule).commands(rule_name) || []
+          commands = service(:rule).commands(rule_name)
 
           # Status of executed commands
           failed = false
@@ -157,8 +163,17 @@ module DistributedMake
             # Log that we are done
             logger.info("task #{rule_name} completed")
 
+            # Handle rules that do not generate anything
+            done_flag = :done
+            unless file_engine.available? rule_name
+              done_flag = :phony
+            else
+              # Publish the output file
+              file_engine.publish(rule_name)
+            end
+
             # We are done here
-            ts.write([:task, rule_name, :done])
+            ts.write([:task, rule_name, done_flag])
           else
             # Log that we failed
             logger.info("task #{rule_name} failed")
