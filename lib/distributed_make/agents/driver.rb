@@ -153,6 +153,9 @@ module DistributedMake
           # If the task is done, fetch the produced file using the engine
           if tuple[2] == :done
             file_engine.get(tuple[1])
+
+            # The driver now has the file
+            file_engine.publish(tuple[1])
           end
 
           # This task is now done

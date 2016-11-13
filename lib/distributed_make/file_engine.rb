@@ -80,6 +80,8 @@ module DistributedMake
     end
 
     def publish(file)
+      file = file.to_s unless file.is_a? String
+
       unless @published_files[file]
         logger.debug("publishing #{file}")
 
