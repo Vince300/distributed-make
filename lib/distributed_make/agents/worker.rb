@@ -29,15 +29,15 @@ module DistributedMake
       def run(host = nil)
         logger.debug("begin #{__method__.to_s}")
 
-        # Start DRb service
-        start_drb(host)
-
         # true if we should continue running the worker
         run_worker = true
         # true if we already have informed the user we are looking for a tuple space
         printed_waiting = false
 
         while run_worker
+          # Start DRb service
+          start_drb(host)
+
           begin
             # Reset the Multilog so it only points to the default logger
             logger.reset
@@ -90,13 +90,10 @@ module DistributedMake
               run_worker = false
             end
           end
+
+          stop_drb
         end
 
-        begin
-          # Exit smoothly
-          DRb.stop_service
-        rescue Interrupt => e
-        end
         logger.debug("end #{__method__.to_s}")
         return
       end

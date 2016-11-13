@@ -74,6 +74,13 @@ module DistributedMake::Agents
       return
     end
 
+    def stop_drb
+      begin
+        DRb.stop_service
+      rescue
+      end
+    end
+
     # Get the host identification string of the current agent. Only valid once DRb service has been started.
     def host
       URI.parse(DRb.uri).host

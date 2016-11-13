@@ -68,6 +68,11 @@ module DistributedMake
           logger.info("exiting")
         end
 
+        # Force kill the process to work around a bug where the RingServer does not shutdown under some circumstances
+        if RbConfig::CONFIG['host_os'] == 'cygwin'
+          system("kill", "-9", Process.pid.to_s)
+        end
+
         logger.debug("end #{__method__.to_s}")
       end
 
@@ -125,9 +130,7 @@ module DistributedMake
       def handle_events(notifier)
         notifier.each do |event, tuple|
           begin
-            if event == 'close' then
-              logger.debug("stopped listening for #{notifier[1][0]} events")
-            else
+            unless event == 'close'
               handler = ('on_' + tuple[0].to_s + '_' + event).to_sym
               if respond_to?(handler, true) # Only call if handler is defined
                 if send(handler, tuple, notifier) == :exit
@@ -144,6 +147,7 @@ module DistributedMake
             raise e
           end
         end
+        logger.debug("stopped listening for #{notifier[1][0]} events")
         return
       end
 
