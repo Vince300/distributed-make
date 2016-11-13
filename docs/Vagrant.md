@@ -27,7 +27,7 @@ Une fois que tout est installé, les commandes suivantes peuvent être utilisée
 bin/rake vagrant up
 
 # Déploiement de la version courante du code sur les machines, dans ~vagrant/distributed-make/current
-bin/cap vagrant deploy
+RAKE_ENV=vagrant bin/rake deploy
 
 # Mise en pause des machines
 bin/rake vagrant suspend
@@ -61,11 +61,11 @@ Le réseau privé utilisé pour les machines Vagrant est 10.20.1.0/24. Par défa
 
 ## Test en utilisant l'environnement Vagrant
 
-Une fois les machines démarrées et le code déployé avec Capistrano (`cap vagrant deploy`), les daemon de travail doivent
-être démarrés, avec la commande suivante :
+Une fois les machines démarrées et le code déployé, les daemon de travail doivent être démarrés, avec la commande
+suivante :
 
 ```bash
-bin/cap vagrant daemon:start
+RAKE_ENV=vagrant bin/rake daemon:start
 ```
 
 Depuis le dossier de développement, il est possible d'exécuter une compilation en utilisant la commande suivante :

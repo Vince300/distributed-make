@@ -1,3 +1,8 @@
+require 'yaml'
+require 'sshkit'
+require 'sshkit/dsl'
+include SSHKit::DSL
+
 # In a development environment, load RSpec and set it as the default task
 begin
   require "rspec/core/rake_task"
@@ -11,31 +16,74 @@ begin
 rescue LoadError
 end
 
-desc "Runs vagrant from the vagrant directory"
-task :vagrant do |task, args|
-  # shift everything until vagrant so we can rake --trace --smth vagrant ...
-  while ARGV.first =~ /^(-|vagrant$)/
-    break if ARGV.shift == 'vagrant'
-  end
+# Method to fetch Vagrant hosts from the currently running machines
+def vagrant_hosts
+  # Run rake vagrant task to get ssh config
+  nullarg = if ENV['OS'] == 'Windows_NT'
+              "2>NUL"
+            else
+              "2>/dev/null"
+            end
+  raw_ssh_options = `cd machines && vagrant ssh-config #{nullarg}`
 
-  Dir.chdir 'machines' do
-    # Catch non-zero for vagrant ssh exit
-    begin
-      sh "vagrant", *ARGV
-    rescue StandardError => e
-      unless ARGV.first == 'ssh'
-        raise e
-      end
+  hosts = Hash.new { |h, k| h[k] = {} }
+  current_host = nil
+
+  # Parse options into the hosts hash
+  raw_ssh_options.split("\n").select { |x| not x.empty? }.map(&:strip).each do |l|
+    k, v = l.split(/\s/, 2).map(&:strip)
+
+    if k == "Host"
+      current_host = v
+    else
+      hosts[current_host][k] = v
     end
   end
 
-  # https://stackoverflow.com/questions/3586997/how-to-pass-multiple-parameters-to-rake-task
-  #
-  # By default, rake considers each 'argument' to be the name of an actual task. 
-  # It will try to invoke each one as a task.  By dynamically defining a dummy
-  # task for every argument, we can prevent an exception from being thrown
-  # when rake inevitably doesn't find a defined task with that name.
-  ARGV.each do |arg|
-    task arg.to_sym do ; end
+  return hosts.collect do |name, host|
+    SSHKit::Host.new(hostname: host['HostName'],
+                     user: host['User'],
+                     port: host['Port'],
+                     ssh_options: {
+                       keys: [host['IdentityFile']],
+                       forward_agent: host['ForwardAgent'] == 'yes'
+                     })
   end
 end
+
+# Load the current environment config
+$env = ENV['RAKE_ENV'] || 'vagrant'
+config_file = File.join('config', $env + '.yml')
+$config = if File.exist? config_file
+           YAML.load(File.read(config_file))
+         else
+           {}
+         end
+
+# Derive the deployment settings from the config
+def release_path
+  $config['release_path']
+end
+
+def current_path
+  File.join(release_path, 'current')
+end
+
+def shared_path
+  File.join(release_path, 'shared')
+end
+
+def workers
+  $config['workers']
+end
+
+def hosts
+  if $env == 'vagrant'
+    vagrant_hosts
+  else
+    fail "custom hosts not yet supported"
+  end
+end
+
+# Load custom tasks from `lib/rake/tasks`
+Dir.glob("lib/rake/tasks/*.rake").each { |r| import r }
