@@ -20,3 +20,5 @@ set :bundle_flags, '--quiet'
 
 # Install test environment to test everything works fine in production
 set :bundle_without, 'development'
+
+set :format_options, truncate: false
