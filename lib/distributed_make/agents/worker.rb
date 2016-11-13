@@ -200,11 +200,6 @@ module DistributedMake
         end
         return
       end
-
-      private
-      def with_renewer
-        yield(Utils::SimpleRenewer.new(service(:job).period))
-      end
     end
   end
 end

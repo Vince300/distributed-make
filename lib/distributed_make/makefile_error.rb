@@ -1,4 +1,3 @@
-require "distributed_make/base"
 require "distributed_make/error"
 
 module DistributedMake

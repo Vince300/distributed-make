@@ -1,4 +1,3 @@
-require "distributed_make/base"
 require "distributed_make/utils/simple_renewer"
 require "distributed_make/file_handle"
 
@@ -92,6 +91,10 @@ module DistributedMake
       end
     end
 
+    # Publishes a {DistributedMake::FileHandle} in the current tuple space to begin serving the given file.
+    #
+    # @param [Pathname, String] file relative path to the file to be published
+    # @return [void]
     def publish(file)
       file = file.to_s unless file.is_a? String
 
@@ -99,14 +102,13 @@ module DistributedMake
         logger.debug("publishing #{file}")
 
         # Keep the reference to the handle so the GC doesn't collect the object
-        # References:
-        #  @published_files -> handle -> renewer
         renewer = Utils::SimpleRenewer.new(period)
-        handle = FileHandle.new(file, self, @worker, renewer)
+        handle = FileHandle.new(File.join(dir, file), @worker)
 
-        @published_files[file] = handle
+        @published_files[file] = [handle, renewer]
         ts.write([:file, file, host, handle], renewer)
       end
+      return
     end
   end
 end

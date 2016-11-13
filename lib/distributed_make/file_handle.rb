@@ -1,57 +1,37 @@
-require "distributed_make/base"
-
-require "io/like"
+require "distributed_make/block_writer"
 
 module DistributedMake
-  class BlockWriter
-    include IO::Like
-
-    def initialize(block)
-      @block = block
-    end
-
-    def unbuffered_write(data)
-      @block.call(data)
-      return data.length
-    end
-
-    def self.open(*args)
-      b = BlockWriter.new(*args)
-      begin
-        yield(b)
-      ensure
-        b.close
-      end
-    end
-  end
-
+  # Represents a file being shared in a tuple space
   class FileHandle
     include DRbUndumped
 
+    # @return [String] absolute path to the file to be shared
     attr_reader :file
-    attr_reader :file_engine
 
+    # @return [Boolean] `true` if this handle belongs to a worker process, `false` otherwise
     def worker?
       !!@worker
     end
 
-    def initialize(file, file_engine, worker, renewer)
+    # @param [String] file absolute path to the file represented by this handle
+    # @param [Boolean] worker `true` if this handle belongs to a worker process, `false` otherwise
+    def initialize(file, worker)
       @file = file
-      @file_engine = file_engine
       @worker = worker
-      @renewer = renewer
     end
 
+    # Transfers the file to the given block.
+    #
+    # @param [String] remote_host name of the host requesting the file, used for slot allocation
+    # @yieldparam [String] data transferred data to be stored to the destination file
+    # @return [void]
     def get_data(remote_host, &block)
-      file_engine.logger.info("serving #{file} to #{remote_host}")
-
       # Dump the whole file to the given block
-      File.open(File.join(file_engine.dir, file), "rb") do |input|
+      File.open(file, "rb") do |input|
         BlockWriter.open(block) do |bl|
           IO.copy_stream(input, bl)
         end
       end
-
       return
     end
   end
