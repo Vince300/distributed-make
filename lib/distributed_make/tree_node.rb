@@ -1,26 +1,19 @@
-require "distributed_make/base"
+require "distributed_make/rule"
 
 module DistributedMake
   # Represents a node in a Makefile tree.
-  class TreeNode
-    # @return [String] name of this node
-    attr_reader :name
-
+  class TreeNode < Rule
     # @return [Array(TreeNode)] parents of this node
     attr_reader :parents
 
     # @return [Array(TreeNode)] children of this node
     attr_reader :children
 
-    # @return [Object] contents of this node
-    attr_accessor :content
-
-    # @param [String] name Name of this node
-    def initialize(name, content = nil)
-      @name = name
+    # @param [Rule, RuleStub] rule rule this node is representing
+    def initialize(rule)
+      super(rule)
       @parents = []
       @children = []
-      @content = content
     end
 
     # Get the list of all ancestors for this node

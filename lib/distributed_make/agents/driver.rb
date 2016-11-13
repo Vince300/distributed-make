@@ -93,15 +93,16 @@ module DistributedMake
         check_stubs(tree)
 
         # If the target rule already exists, there is nothing to do
-        if tree.content.done?
+        if tree.done?
           logger.info("nothing to be done")
           return
         end
 
         # Register the rule service
-        non_stubs = @task_dict.select { |key, node| not node.content.is_stub? }.to_a
-        commands = non_stubs.collect { |key, node| [key, node.content.commands] }.to_h
-        dependencies = non_stubs.collect { |key, node| [key, node.content.dependencies] }.to_h
+        non_stubs = @task_dict.values.select { |rule| not rule.is_stub? }.to_a
+        commands = non_stubs.collect { |rule| [rule.name, rule.commands] }.to_h
+        dependencies = non_stubs.collect { |rule| [rule.name, rule.dependencies] }.to_h
+
         register_service(:rule, Services::RuleService.new(commands, dependencies))
 
         # Create the notifier that detects task events
@@ -167,23 +168,23 @@ module DistributedMake
           file_engine.publish(tuple[1])
           
           # This task is now done
-          node = @task_dict[tuple[1]]
-          rule_done(node.content)
+          rule = @task_dict[tuple[1]]
+          rule_done(rule)
 
           # Walk parents of this node to process further rules
-          node.parents.each do |parent|
-            unless parent.content.processing? or parent.content.done?
+          rule.parents.each do |parent|
+            unless parent.processing? or parent.done?
               # The parent task is not being processed
-              if parent.children.all? { |child| child.content.done? }
+              if parent.children.all? { |child| child.done? }
                 # All children of this parent are done, process parent
-                logger.debug("task #{parent.content.name} is ready to be processed")
-                add_rule(parent.content)
+                logger.debug("task #{parent.name} is ready to be processed")
+                add_rule(parent)
               end
             end
           end
 
           # Root rule completed?
-          if @task_tree.content.done?
+          if @task_tree.done?
             logger.info("build job completed in #{Time.now - @started_at}s")
             notifier.cancel
             return :exit
@@ -263,13 +264,11 @@ module DistributedMake
       # @param [TreeNode] tree make tree
       # @return [void]
       def append_not_done(tree)
-        tree.each_node do |node|
-          rule = node.content
-
+        tree.each_node do |rule|
           unless rule.done? or rule.processing?
             # Check all child nodes are ready
-            if node.children.all? { |child| child.content.done? }
-              add_rule(node.content)
+            if rule.children.all? { |child| child.done? }
+              add_rule(rule)
             end
           end
 
@@ -283,9 +282,7 @@ module DistributedMake
       # @param [TreeNode] tree make tree
       # @return [void]
       def check_stubs(tree)
-        tree.each_node do |node|
-          rule = node.content
-
+        tree.each_node do |rule|
           if rule.is_stub?
             # This rule is a pure dependency, it must be available in the current working directory
             unless file_engine.available? rule.name

@@ -2,9 +2,8 @@ require "distributed_make/base"
 
 module DistributedMake
   # Represents the basis of a Makefile rule or dependency.
-  #
-  # @attr_reader [String] name Name of this rule.
   class RuleStub
+    # @return [String] name of this rule
     attr_reader :name
 
     # @param [String] target the target name for this rule.
@@ -41,6 +40,16 @@ module DistributedMake
     # @param [Bool] value <tt>true</tt> if this rule is being processed, <tt>false</tt> otherwise.
     def processing=(value)
       @processing = value
+    end
+
+    # Converts this rule stub into a hash for inspection.
+    #
+    # @return [Hash] A hash representing the object with the following attributes:
+    #   * [String] <tt>:name</tt> the target name for this rule.
+    def to_h
+      {
+        :name => @name
+      }
     end
 
     # Return a value indicating if this rule is a stub
