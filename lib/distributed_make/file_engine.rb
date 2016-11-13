@@ -94,9 +94,14 @@ module DistributedMake
       unless @published_files[file]
         logger.debug("publishing #{file}")
 
-        handle = FileHandle.new(file, self, @worker)
-        @published_files[file] = handle # Keep the reference to the handle so the GC doesn't collect the object
-        ts.write([:file, file, host, handle], Utils::SimpleRenewer.new(period))
+        # Keep the reference to the handle so the GC doesn't collect the object
+        # References:
+        #  @published_files -> handle -> renewer
+        renewer = Utils::SimpleRenewer.new(period)
+        handle = FileHandle.new(file, self, @worker, renewer)
+
+        @published_files[file] = handle
+        ts.write([:file, file, host, handle], renewer)
       end
     end
   end

@@ -113,79 +113,92 @@ module DistributedMake
           # Notify
           logger.info("got task #{rule_name}")
 
-          # Tell tuple space we are processing, watching for timeout
-          ts.write([:task, rule_name, :working], Utils::SimpleRenewer.new(service(:job).period))
+          with_renewer do |renewer|
+            working_tuple = [:task, rule_name, :working]
+            # Tell tuple space we are processing, watching for timeout
+            ts.write(working_tuple, renewer)
 
-          # Fetch all dependencies
-          service(:rule).dependencies(rule_name).each do |dep|
-            file_engine.get(dep)
-          end
-
-          # Find what we have to do
-          commands = service(:rule).commands(rule_name)
-
-          # Status of executed commands
-          failed = false
-
-          unless service(:job).dry_run?
-            # Do the work
-            commands.each do |command|
-              logger.info("run: #{command}")
-              output = `#{command} 2>&1` # execute verbatim command, redirect stderr
-
-              # Log command return code
-              suffix = unless output.empty? then
-                         ": "
-                       else
-                         ""
-                       end
-              if $?.success?
-                logger.info("success#{suffix}")
-              else
-                logger.error("failure (#{$?})#{suffix}")
-                failed = true
-              end
-
-              unless output.empty?
-                # Log command output
-                logger.info(output)
-              end
-
-              break if failed
+            # Fetch all dependencies
+            service(:rule).dependencies(rule_name).each do |dep|
+              file_engine.get(dep)
             end
-          else
-            commands.each do |command|
-              logger.info("dry-run: #{command}")
-            end
-          end
 
-          unless failed
-            # Log that we are done
-            logger.info("task #{rule_name} completed")
+            # Find what we have to do
+            commands = service(:rule).commands(rule_name)
 
-            # Handle rules that do not generate anything
-            done_flag = :done
-            unless file_engine.available? rule_name
-              done_flag = :phony
+            # Status of executed commands
+            failed = false
+
+            unless service(:job).dry_run?
+              commands.each do |command|
+                logger.info("run: #{command}")
+
+                output = ''
+                # execute verbatim command, redirect stderr
+                IO.popen(command, :err => [:child, :out]) do |pipe|
+                  begin
+                    output += pipe.read_nonblock(80)
+                  rescue IO::WaitReadable
+                    Thread.pass
+                    IO.select([pipe], [], [], service(:job).period / 5)
+                    retry
+                  rescue EOFError
+                  end
+                end
+
+                # Log command return code
+                suffix = unless output.empty? then
+                           ": #{output}"
+                         else
+                           ""
+                         end
+                if $?.success?
+                  logger.info("success#{suffix}")
+                else
+                  logger.error("failure (#{$?})#{suffix}")
+                  failed = true
+                end
+                break if failed
+              end
             else
-              # Publish the output file
-              file_engine.publish(rule_name)
+              commands.each do |command|
+                logger.info("dry-run: #{command}")
+              end
             end
 
-            # We are done here
-            ts.write([:task, rule_name, done_flag])
-          else
-            # Log that we failed
-            logger.info("task #{rule_name} failed")
+            unless failed
+              # Log that we are done
+              logger.info("task #{rule_name} completed")
 
-            # We failed
-            ts.write([:task, rule_name, :failed])
+              # Handle rules that do not generate anything
+              done_flag = :done
+              unless file_engine.available? rule_name
+                done_flag = :phony
+              else
+                # Publish the output file
+                file_engine.publish(rule_name)
+              end
+
+              # We are done here
+              ts.write([:task, rule_name, done_flag])
+            else
+              # Log that we failed
+              logger.info("task #{rule_name} failed")
+
+              # We failed
+              ts.write([:task, rule_name, :failed])
+            end
+
+            # Remove working task tuple
+            ts.take(working_tuple)
           end
-
-          # Remove working task tuple
-          ts.take([:task, rule_name, :working])
         end
         return
+      end
+
+      private
+      def with_renewer
+        yield(Utils::SimpleRenewer.new(service(:job).period))
       end
     end
   end

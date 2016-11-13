@@ -11,10 +11,11 @@ module DistributedMake
       !!@worker
     end
 
-    def initialize(file, file_engine, worker)
+    def initialize(file, file_engine, worker, renewer)
       @file = file
       @file_engine = file_engine
       @worker = worker
+      @renewer = renewer
     end
 
     def get_data(remote_host)
