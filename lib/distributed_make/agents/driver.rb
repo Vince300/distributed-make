@@ -156,18 +156,16 @@ module DistributedMake
       # @param [Array<Symbol, String, Symbol>] tuple task tuple
       # @param [Rinda::NotifyTemplateEntry] notifier notifier which is the source for this event
       def on_task_write(tuple, notifier)
-        if [:done, :phony].include? tuple[2]
+        if tuple[2] == :done
           # A task is completed
           ts.take([:task, tuple[1], tuple[2]])
 
           # If the task is done, fetch the produced file using the engine
-          if tuple[2] == :done
-            file_engine.get(tuple[1])
+          file_engine.get(tuple[1])
 
-            # The driver now has the file
-            file_engine.publish(tuple[1])
-          end
-
+          # The driver now has the file
+          file_engine.publish(tuple[1])
+          
           # This task is now done
           node = @task_dict[tuple[1]]
           rule_done(node.content)

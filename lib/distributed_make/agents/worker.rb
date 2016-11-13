@@ -176,16 +176,16 @@ module DistributedMake
               logger.info("task #{rule_name} completed")
 
               # Handle rules that do not generate anything
-              done_flag = :done
+              # TODO: Handle them properly
               unless file_engine.available? rule_name
-                done_flag = :phony
-              else
-                # Publish the output file
-                file_engine.publish(rule_name)
+                File.open(rule_name, "w") {} # touch rule_name
               end
 
+              # Publish the output file
+              file_engine.publish(rule_name)
+
               # We are done here
-              ts.write([:task, rule_name, done_flag])
+              ts.write([:task, rule_name, :done])
             else
               # Log that we failed
               logger.info("task #{rule_name} failed")
