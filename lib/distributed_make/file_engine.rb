@@ -82,8 +82,10 @@ module DistributedMake
     def publish(file)
       unless @published_files[file]
         logger.debug("publishing #{file}")
-        @published_files[file] = true
-        ts.write([:file, file, host, FileHandle.new(file, self)], Utils::SimpleRenewer.new(period))
+
+        handle = FileHandle.new(file, self)
+        @published_files[file] = handle # Keep the reference to the handle so the GC doesn't collect the object
+        ts.write([:file, file, host, handle], Utils::SimpleRenewer.new(period))
       end
     end
   end
