@@ -7,6 +7,7 @@ require "drb/drb"
 require "rinda/ring"
 
 require "tmpdir"
+require "open3"
 
 module DistributedMake
   module Agents
@@ -133,31 +134,38 @@ module DistributedMake
               commands.each do |command|
                 logger.info("run: #{command}")
 
-                output = ''
                 # execute verbatim command, redirect stderr
-                IO.popen(command, :err => [:child, :out]) do |pipe|
-                  begin
-                    output += pipe.read_nonblock(80)
-                  rescue IO::WaitReadable
-                    Thread.pass
-                    IO.select([pipe], [], [], service(:job).period / 5)
-                    retry
-                  rescue EOFError
+                Open3.popen2e(command) do |input, pipe, t|
+                  output = ''
+
+                  loop do
+                    begin
+                      output += pipe.read_nonblock(80)
+                    rescue IO::WaitReadable
+                      IO.select([pipe])
+                      retry
+                    rescue EOFError
+                      break
+                    end
+                  end
+
+                  # Wait for process completion
+                  exit_status = t.value
+
+                  # Log command return code
+                  suffix = unless output.empty? then
+                             ": #{output}"
+                           else
+                             ""
+                           end
+                  if exit_status.success?
+                    logger.info("success#{suffix}")
+                  else
+                    logger.error("failure (#{$?})#{suffix}")
+                    failed = true
                   end
                 end
 
-                # Log command return code
-                suffix = unless output.empty? then
-                           ": #{output}"
-                         else
-                           ""
-                         end
-                if $?.success?
-                  logger.info("success#{suffix}")
-                else
-                  logger.error("failure (#{$?})#{suffix}")
-                  failed = true
-                end
                 break if failed
               end
             else
