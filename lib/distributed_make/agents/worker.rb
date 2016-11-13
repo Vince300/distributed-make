@@ -164,6 +164,13 @@ module DistributedMake
 
                 break if failed
               end
+
+              unless failed
+                unless file_engine.available? rule_name
+                  logger.error("no output file produced for #{rule_name}")
+                  failed = true
+                end
+              end
             else
               commands.each do |command|
                 logger.info("dry-run: #{command}")
@@ -173,12 +180,6 @@ module DistributedMake
             unless failed
               # Log that we are done
               logger.info("task #{rule_name} completed")
-
-              # Handle rules that do not generate anything
-              # TODO: Handle them properly
-              unless file_engine.available? rule_name
-                File.open(rule_name, "w") {} # touch rule_name
-              end
 
               # Publish the output file
               file_engine.publish(rule_name)

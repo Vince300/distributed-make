@@ -101,7 +101,11 @@ module DistributedMake
         # Register the rule service
         non_stubs = @task_dict.values.select { |rule| not rule.is_stub? }.to_a
         commands = non_stubs.collect { |rule| [rule.name, rule.commands] }.to_h
-        dependencies = non_stubs.collect { |rule| [rule.name, rule.dependencies] }.to_h
+        dependencies = non_stubs.collect do |rule|
+          [rule.name, rule.all_dependencies
+                        .select { |rule| not rule.phony? }
+                        .collect { |rule| rule.name }]
+        end.to_h
 
         register_service(:rule, Services::RuleService.new(commands, dependencies))
 
@@ -157,31 +161,20 @@ module DistributedMake
       # @param [Array<Symbol, String, Symbol>] tuple task tuple
       # @param [Rinda::NotifyTemplateEntry] notifier notifier which is the source for this event
       def on_task_write(tuple, notifier)
+        rule_name = tuple[1]
+
         if tuple[2] == :done
           # A task is completed
-          ts.take([:task, tuple[1], tuple[2]])
+          ts.take([:task, rule_name, tuple[2]])
 
           # If the task is done, fetch the produced file using the engine
-          file_engine.get(tuple[1])
+          file_engine.get(rule_name)
 
           # The driver now has the file
-          file_engine.publish(tuple[1])
-          
-          # This task is now done
-          rule = @task_dict[tuple[1]]
-          rule_done(rule)
+          file_engine.publish(rule_name)
 
-          # Walk parents of this node to process further rules
-          rule.parents.each do |parent|
-            unless parent.processing? or parent.done?
-              # The parent task is not being processed
-              if parent.children.all? { |child| child.done? }
-                # All children of this parent are done, process parent
-                logger.debug("task #{parent.name} is ready to be processed")
-                add_rule(parent)
-              end
-            end
-          end
+          # This task is now done
+          rule_done(@task_dict[rule_name])
 
           # Root rule completed?
           if @task_tree.done?
@@ -191,18 +184,18 @@ module DistributedMake
           end
         elsif tuple[2] == :failed
           # A task failed running because an external command returned non-zero
-          ts.take([:task, tuple[1], :failed])
+          ts.take([:task, rule_name, :failed])
 
           # We should abort right now: canel the notifier and remove all tasks
-          logger.error("task #{tuple[1]} failed, aborting further compilation")
+          logger.error("task #{rule_name} failed, aborting further compilation")
           notifier.cancel
           return :exit
         elsif tuple[2] == :working
           # A task is being worked on
-          logger.info("task #{tuple[1]} is being processed")
+          logger.info("task #{rule_name} is being processed")
 
           # Remove the :scheduled task
-          ts.take([:task, tuple[1], :scheduled])
+          ts.take([:task, rule_name, :scheduled])
         end
         return nil
       end
@@ -213,18 +206,20 @@ module DistributedMake
       # @param [Rinda::NotifyTemplateEntry] notifier notifier which is the source for this event
       def on_task_delete(tuple, notifier)
         # Some task became outdated, suspicious
+        rule_name = tuple[1]
+
         if tuple[2] == :working
           # A worker just died, add the task back
-          logger.warn("worker died processing #{tuple[1]}, restoring")
+          logger.warn("worker died processing #{rule_name}, restoring")
 
           # Restore task
-          ts.write([:task, tuple[1], :todo])
+          ts.write([:task, rule_name, :todo])
         elsif tuple[2] == :scheduled
           # A worker didn't report processing the task
-          logger.error("worker didn't start working on scheduled task #{tuple[1]}, restoring")
+          logger.error("worker didn't start working on scheduled task #{rule_name}, restoring")
 
           # Restore task
-          ts.write([:task, tuple[1], :todo])
+          ts.write([:task, rule_name, :todo])
         end
       end
 
@@ -233,14 +228,16 @@ module DistributedMake
       # @param [Array<Symbol, String, Symbol>] tuple task tuple
       # @param [Rinda::NotifyTemplateEntry] notifier notifier which is the source for this event
       def on_task_take(tuple, notifier)
+        rule_name = tuple[1]
+
         if tuple[2] == :todo
           # Some worker requested a task to be done
           # If the worker goes away before pushing the :working task, this unit will be lost
-          logger.debug("task #{tuple[1]} has been scheduled")
+          logger.debug("task #{rule_name} has been scheduled")
 
           # Add a tuple that explains this
           # Its expire should be short, so just set it to a few periods
-          ts.write([:task, tuple[1], :scheduled], 5 * service(:job).period)
+          ts.write([:task, rule_name, :scheduled], 5 * service(:job).period)
 
           # Note that the first task being scheduled indicates a worker joined the space, so start timing now
           @started_at = Time.now unless @started_at
@@ -265,9 +262,9 @@ module DistributedMake
       # @return [void]
       def append_not_done(tree)
         tree.each_node do |rule|
-          unless rule.done? or rule.processing?
+          unless rule.done? or rule.processing? or rule.phony?
             # Check all child nodes are ready
-            if rule.children.all? { |child| child.done? }
+            if rule.ready?
               add_rule(rule)
             end
           end
@@ -282,7 +279,7 @@ module DistributedMake
       # @param [TreeNode] tree make tree
       # @return [void]
       def check_stubs(tree)
-        tree.each_node do |rule|
+        tree.leaf_traversal do |rule|
           if rule.is_stub?
             # This rule is a pure dependency, it must be available in the current working directory
             unless file_engine.available? rule.name
@@ -290,13 +287,18 @@ module DistributedMake
             end
           end
 
-          if file_engine.available? rule.name
-            rule.done = true
+          if rule.phony?
+            # Phony rule: is done if all its dependencies are done
+            if rule.ready?
+              rule.done = true
+            end
+          else
+            # Standard rule: is done if the file exists
+            if file_engine.available? rule.name
+              rule.done = true
+            end
           end
-
-          true # continue enumerating child nodes
         end
-        return
       end
 
       # Add a rule as a task in the tuple space.
@@ -310,7 +312,7 @@ module DistributedMake
         rule
       end
 
-      # Flags a rule as done after processing.
+      # Flags a rule as done after processing. Adds rules that can be processed as soon as possible.
       #
       # @param [Rule] rule make rule to flag as done
       # @return [Rule] rule flagged as done
@@ -318,7 +320,23 @@ module DistributedMake
         rule.done = true
         rule.processing = false
         logger.info("task #{rule.name} is completed")
-        rule
+
+        # Walk parents of this node to process further rules
+        rule.parents.each do |parent|
+          unless parent.processing? or parent.done?
+            # The parent task is not being processed or done
+            if parent.ready?
+              if parent.phony?
+                # Walk up the dependency tree
+                rule_done(parent)
+              else
+                # The rule is ready to be processed
+                logger.debug("task #{parent.name} is ready to be processed")
+                add_rule(parent)
+              end
+            end
+          end
+        end
       end
     end
   end

@@ -48,6 +48,15 @@ module DistributedMake
       return self
     end
 
+    # @return [Boolean] `true` if this rule does not produce any output
+    def phony?
+      if @commands
+        @commands.empty?
+      else
+        false
+      end
+    end
+
     # Converts this rule into a hash for inspection.
     #
     # @return [Hash] A hash representing the object with the following attributes:

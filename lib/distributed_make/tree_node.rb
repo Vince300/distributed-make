@@ -16,6 +16,37 @@ module DistributedMake
       @children = []
     end
 
+    # @return [Boolean] `true` if all the dependencies of this rule are done
+    def ready?
+      children.all? { |rule| rule.done? }
+    end
+
+    # Warning: this method should only be used once the tree will not be changed anymore, as the result of this method
+    # is cached.
+    #
+    # @return [Array(TreeNode)] list of transitive dependencies of this node
+    def all_dependencies
+      # a stub does not have dependencies
+      return [] if is_stub?
+
+      # return cached dependencies
+      return @all_dependencies if @all_dependencies
+
+      @all_dependencies = []
+      children.each do |child|
+        # Add the direct dependency
+        @all_dependencies << child
+
+        # Add all transitive dependencies for this child
+        @all_dependencies.concat(child.all_dependencies)
+      end
+
+      # The graph may contain multiple references to the same dependency
+      @all_dependencies.uniq!
+
+      return @all_dependencies
+    end
+
     # Get the list of all ancestors for this node
     #
     # @return [Array] Array of all the ancestors of this node.
@@ -96,6 +127,26 @@ module DistributedMake
           end
         end
       end
+    end
+
+    # Traverses the tree in breadth order, starting with the leaf-most nodes
+    #
+    # @yieldparam [TreeNode] node current node
+    # @return [void]
+    def leaf_traversal(&block)
+      traversal_sets = []
+
+      # Current root
+      current_set = [self]
+      while not current_set.empty?
+        traversal_sets << current_set
+        current_set = current_set.collect { |node| node.children }.flatten
+      end
+
+      traversal_sets.reverse_each do |set|
+        set.each(&block)
+      end
+      return
     end
 
     protected
