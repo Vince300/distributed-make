@@ -13,7 +13,7 @@ describe "sample Makefiles" do
 
         # Change
         Dir.chdir(tmp) do
-          system(RbConfig.ruby, exe_path, "driver", "--host", "10.20.1.1")
+          system(RbConfig.ruby, exe_path, "driver")
         end
       end
     end
