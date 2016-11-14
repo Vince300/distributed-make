@@ -110,11 +110,9 @@ module DistributedMake
           # Notify
           logger.info("got task #{rule_name}")
 
-          with_renewer do |renewer|
-            working_tuple = [:task, rule_name, :working]
-            # Tell tuple space we are processing, watching for timeout
-            ts.write(working_tuple, renewer)
-
+          # Tell tuple space we are processing, watching for timeout
+          working_tuple = [:task, rule_name, :working]
+          with_renewer(ts.write(working_tuple, service(:job).period)) do
             # Fetch all dependencies
             service(:rule).dependencies(rule_name).each do |dep|
               file_engine.get(dep)

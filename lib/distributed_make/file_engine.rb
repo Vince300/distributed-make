@@ -36,6 +36,26 @@ module DistributedMake
       @period = period
       @worker = worker
       @published_files = {}
+
+      @run_renewer = true
+      @renewer_thread = Thread.start do
+        while @run_renewer do
+          @published_files.values.each do |entry|
+            begin
+              entry[1].renew(period)
+            rescue DRb::DRbConnError
+            end
+          end
+
+          sleep(period / 2.0)
+        end
+      end
+    end
+
+    # Terminates this file engine
+    def terminate
+      @run_renewer = false
+      @renewer_thread.join
     end
 
     # @return [Bool] `true` if the file is available in the managed directory, `false` otherwise
@@ -115,11 +135,12 @@ module DistributedMake
         logger.debug("publishing #{file}")
 
         # Keep the reference to the handle so the GC doesn't collect the object
-        renewer = Utils::SimpleRenewer.new(period)
         handle = FileHandle.new(File.join(dir, file), @worker)
 
-        @published_files[file] = [handle, renewer]
-        ts.write([:file, file, host, handle], renewer)
+        @published_files[file] = [
+          handle,
+          ts.write([:file, file, host, handle], period)
+        ]
       end
       return
     end

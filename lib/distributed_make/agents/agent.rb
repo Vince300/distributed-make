@@ -109,18 +109,30 @@ module DistributedMake
         begin
           yield
         ensure
+          @file_engine.terminate
           @file_engine = nil
         end
       end
 
-      # Executes the given block with a {DistributedMake::Utils::SimpleRenewer} as its argument.
-      # This can be used to ensure the renewer is not collected by the GC for the duration of the block.
+      # Executes the given block while renewing a given tuple entry.
       #
-      # @param [Integer, nil] sec renewer timeout, defaults to the tuple space period
+      # @param [TupleEntry] entry Entry to manage
       # @return [Object] value returned by the block
-      # @yieldparam [DistributedMake::Utils::SimpleRenewer] renewer allocated renewer object
-      def with_renewer(sec = nil)
-        yield(Utils::SimpleRenewer.new(sec || service(:job).period))
+      def with_renewer(entry)
+        do_run = true
+        thd = Thread.start do
+          while do_run do
+            entry.renew(service(:job).period)
+            sleep(service(:job).period / 10.0)
+          end
+        end
+
+        begin
+          return yield
+        ensure
+          do_run = false
+          thd.join
+        end
       end
     end
   end
