@@ -2,6 +2,7 @@ require "distributed_make/utils/simple_renewer"
 require "distributed_make/file_handle"
 
 require "fileutils"
+require "tempfile"
 require "drb/drb"
 
 module DistributedMake
@@ -79,12 +80,19 @@ module DistributedMake
         else
           # Download everything from socket to local file
           started_at = Time.now
-          File.open(File.join(dir, file), "wb") do |output|
+
+          # Download to temp file
+          tmp = Tempfile.new
+          File.open(tmp.path, "wb") do |output|
             agent.get_data(host) do |data|
               output.write(data)
               Thread.pass
             end
           end
+
+          # Move the tempfile away
+          tmp.close
+          FileUtils.mv(tmp.path, File.join(dir, file))
 
           ended_at = Time.now
           speed = File.size(file) / (ended_at - started_at)
