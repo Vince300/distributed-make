@@ -16,11 +16,7 @@ if ! [[ -d "/home/dismake" ]]; then
 
   # Deploy the authorized_keys for SSH login
   cp -r /root/.ssh ~dismake/
+
+  # Fix permissions
+  chown -R dismake:dismake ~dismake
 fi
-
-# Ensure we are running under the right RAKE_ENV
-echo "export RAKE_ENV=grid5000" >~dismake/.bash_profile
-echo "export RAKE_ENV=grid5000" >~dismake/.profile
-
-# Fix permissions
-chown -R dismake:dismake ~dismake
