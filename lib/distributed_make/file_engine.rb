@@ -82,6 +82,7 @@ module DistributedMake
           File.open(File.join(dir, file), "wb") do |output|
             agent.get_data(host) do |data|
               output.write(data)
+              Thread.pass
             end
           end
 
