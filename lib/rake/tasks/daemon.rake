@@ -5,7 +5,7 @@ namespace :daemon do
       within current_path do
         execute :mkdir, '-p', File.join(shared_path, 'pids')
         execute :mkdir, '-p', File.join(shared_path, 'log')
-        workers.each do |worker|
+        workers(host.hostname).each do |worker|
           execute '/sbin/start-stop-daemon', '--pidfile', File.join(shared_path, 'pids', "#{worker}.pid"),
                   '--start', '--make-pidfile', '--chdir', current_path, '--user', host.user, '--background',
                   '--startas', '/bin/bash', '--', '-c "exec /usr/local/rvm/bin/rvm default do bundle exec distributed-make worker --log ' +
@@ -17,9 +17,9 @@ namespace :daemon do
 
   desc "Stops the worker daemon"
   task :stop do
-    on hosts do
+    on hosts do |host|
       within current_path do
-        workers.each do |worker|
+        workers(host.hostname).each do |worker|
           begin
             execute '/sbin/start-stop-daemon', '--stop', '--pidfile', File.join(shared_path, 'pids', "#{worker}.pid")
           rescue StandardError

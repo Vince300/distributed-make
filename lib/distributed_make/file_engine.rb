@@ -93,10 +93,15 @@ module DistributedMake
         agent = target_tuple[3]
 
         if remote_host == host
-          # We are on the same host, hardlink
-          FileUtils.ln(agent.file, File.join(dir, file))
-
-          logger.info("hardlinked #{file}")
+          begin
+            # We are on the same host, hardlink
+            FileUtils.ln(agent.file, File.join(dir, file))
+            logger.info("hardlinked #{file}")
+          rescue Errno::EXDEV
+            # Failed to ln, cp
+            FileUtils.cp(agent.file, File.join(dir, file))
+            logger.info("copied #{file}")
+          end
         else
           # Download everything from socket to local file
           started_at = Time.now

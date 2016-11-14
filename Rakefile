@@ -94,15 +94,21 @@ def bundler_path
   File.join(release_path, 'bundle')
 end
 
-def workers
-  $config['workers']
+def workers(host)
+  if $env == 'vagrant'
+    $config['workers']
+  else
+    $config['hosts'][host]
+  end
 end
 
-def hosts
+def hosts(override_user = nil)
   if $env == 'vagrant'
     vagrant_hosts
   else
-    fail "custom hosts not yet supported"
+    $config['hosts'].keys.collect do |hostname|
+      SSHKit::Host.new(hostname: hostname, user: (override_user || $config['user']))
+    end
   end
 end
 
