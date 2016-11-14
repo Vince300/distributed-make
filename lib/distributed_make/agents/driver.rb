@@ -167,20 +167,27 @@ module DistributedMake
           # A task is completed
           ts.take([:task, rule_name, tuple[2]])
 
-          # If the task is done, fetch the produced file using the engine
-          file_engine.get(rule_name)
+          begin
+            # If the task is done, fetch the produced file using the engine
+            file_engine.get(rule_name)
 
-          # The driver now has the file
-          file_engine.publish(rule_name)
+            # The driver now has the file
+            file_engine.publish(rule_name)
 
-          # This task is now done
-          rule_done(@task_dict[rule_name])
+            # This task is now done
+            rule_done(@task_dict[rule_name])
 
-          # Root rule completed?
-          if @task_tree.done?
-            logger.info("build job completed in #{Time.now - @started_at}s")
-            notifier.cancel
-            return :exit
+            # Root rule completed?
+            if @task_tree.done?
+              logger.info("build job completed in #{Time.now - @started_at}s")
+              notifier.cancel
+              return :exit
+            end
+          rescue DRb::DRbConnError
+            # We failed to transfer the file, retry the rule
+            logger.error("failed transferring #{rule_name}")
+
+            ts.write([:task, rule_name, :todo])
           end
         elsif tuple[2] == :failed
           # A task failed running because an external command returned non-zero
