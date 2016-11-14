@@ -179,7 +179,7 @@ module DistributedMake
 
             # Root rule completed?
             if @task_tree.done?
-              logger.info("build job completed in #{Time.now - @started_at}s")
+              logger.info("build job #{service(:job).name} completed in #{Time.now - @started_at}s")
               notifier.cancel
               return :exit
             end
