@@ -36,7 +36,7 @@ grammar Makefile
   end
 
   rule newline
-    [\r]? [\n]
+    ('#' [^\r\n]*)? [\r]? [\n]
   end
 
   # An identifier (something that looks like a filename)
