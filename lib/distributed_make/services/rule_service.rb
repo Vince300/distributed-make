@@ -6,6 +6,7 @@ module DistributedMake::Services
     # Get the commands for the given rule.
     #
     # @param [String] rule_name name of the rule
+    # @return [Hash<String, Array<String>>]
     def commands(rule_name)
       unless @commands.has_key? rule_name
         raise "rule #{rule_name} does not exist"
@@ -16,13 +17,18 @@ module DistributedMake::Services
 
     # Get the dependencies for the given rule.
     #
-    # @param [String] rule_name name of the rule
-    def dependencies(rule_name)
-      unless @dependencies.has_key? rule_name
-        raise "rule #{rule_name} does not exist"
-      end
+    # @param [String] rule_name name of the rule, or nil to access all the rules
+    # @return [Array<String>, Hash<String, Array<String>>]
+    def dependencies(rule_name = nil)
+      if rule_name
+        unless @dependencies.has_key? rule_name
+          raise "rule #{rule_name} does not exist"
+        end
 
-      @dependencies[rule_name]
+        @dependencies[rule_name]
+      else
+        @dependencies
+      end
     end
 
     # @param [Hash<String, [Array<String>]>] commands hash of command definitions

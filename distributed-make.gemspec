@@ -35,6 +35,9 @@ Gem::Specification.new do |spec|
   # YARD documentation
   spec.add_development_dependency "yard", "~> 0.9.5"
 
+  # Profiling
+  spec.add_development_dependency "ruby-prof", "~> 0.16"
+
   # Rake task runner
   spec.add_runtime_dependency 'rake', '~>11.3'
 
@@ -50,6 +53,6 @@ Gem::Specification.new do |spec|
   # Command line interface
   spec.add_runtime_dependency 'commander', '~>4.4'
 
-  # File transfer
-  spec.add_runtime_dependency 'io-like', '~>0.3'
+  # Priority queue
+  spec.add_runtime_dependency 'PriorityQueue', '~> 0.1'
 end

@@ -303,6 +303,9 @@ module DistributedMake
             # Standard rule: is done if the file exists
             if file_engine.available? rule.name
               rule.done = true
+
+              # Publish the file so workers can get it
+              file_engine.publish(rule.name)
             end
           end
         end

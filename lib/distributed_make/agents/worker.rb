@@ -6,6 +6,8 @@ require "distributed_make/utils/multilog"
 require "drb/drb"
 require "rinda/ring"
 
+require "priority_queue"
+
 require "tmpdir"
 require "open3"
 
@@ -60,9 +62,6 @@ module DistributedMake
             Dir.mktmpdir("distributed-make") do |tmpdir|
               # Change to this directory so tools behave as expected
               Dir.chdir(tmpdir) do
-                # Setup the tmp dir as an instance variable
-                logger.debug("working directory: #{tmpdir}")
-
                 with_file_engine(service(:job).period, true) do
                   # We have joined the tuple space, start processing using this agent
                   yield self
@@ -101,99 +100,202 @@ module DistributedMake
       #
       # @return [void]
       def process_work
-        # Forever
-        while true
-          # Take a task to do
-          tuple = ts.take([:task, nil, :todo])
-          rule_name = tuple[1]
+        with_rule_queue do
+          # Forever
+          loop do
+            attempt = 0
 
-          # Notify
-          logger.info("got task #{rule_name}")
-
-          # Tell tuple space we are processing, watching for timeout
-          working_tuple = [:task, rule_name, :working]
-          with_renewer(ts.write(working_tuple, service(:job).period)) do
-            # Fetch all dependencies
-            service(:rule).dependencies(rule_name).each do |dep|
-              file_engine.get(dep)
+            # Find out best option using priority queue
+            # Note that we use "to_a" so the dep_thread doesn't modify
+            # the priority queue while we are enumerating it
+            rq = @rule_queue.to_a
+            tuple = nil
+            rq.each do |target, priority|
+              if priority < rule_dependencies[target].length
+                begin
+                  tuple = ts.take([:task, target, :todo], 0)
+                  break
+                rescue Rinda::RequestExpiredError
+                  attempt = attempt + 1
+                end
+              end
             end
 
-            # Find what we have to do
-            commands = service(:rule).commands(rule_name)
+            # We couldn't get a task, wait for one
+            unless tuple
+              tuple = ts.take([:task, nil, :todo])
+              logger.info("got last-chance task #{tuple[1]}")
+            else
+              logger.info("got #{attempt}/#{rq.length} task #{tuple[1]}")
+            end
 
-            # Status of executed commands
-            failed = false
+            # The obtained rule name
+            rule_name = tuple[1]
 
-            unless service(:job).dry_run?
-              commands.each do |command|
-                logger.info("run: #{command}")
+            # Tell tuple space we are processing, watching for timeout
+            working_tuple = [:task, rule_name, :working]
+            with_renewer(ts.write(working_tuple, service(:job).period)) do
+              # Fetch all dependencies
+              service(:rule).dependencies(rule_name).each do |dep|
+                file_engine.get(dep)
 
-                # execute verbatim command, redirect stderr
-                Open3.popen2e(command) do |input, pipe, t|
-                  output = ''
+                # Update priority of corresponding tasks
+                update_file_rule_dependencies(dep)
+              end
 
-                  loop do
-                    begin
-                      output += pipe.read_nonblock(80)
-                    rescue IO::WaitReadable
-                      IO.select([pipe])
-                      retry
-                    rescue EOFError
-                      break
-                    end
-                  end
+              # Find what we have to do
+              commands = service(:rule).commands(rule_name)
 
-                  # Wait for process completion
-                  exit_status = t.value
+              # Status of executed commands
+              failed = false
 
-                  # Log command return code
-                  suffix = unless output.empty? then
-                             ": #{output}"
-                           else
-                             ""
-                           end
-                  if exit_status.success?
-                    logger.info("success#{suffix}")
-                  else
-                    logger.error("failure (#{$?})#{suffix}")
-                    failed = true
-                  end
+              unless service(:job).dry_run?
+                failed = !run_rule_commands(commands, rule_name)
+              else
+                commands.each do |command|
+                  logger.info("dry-run: #{command}")
                 end
-
-                break if failed
               end
 
               unless failed
-                unless file_engine.available? rule_name
-                  logger.error("no output file produced for #{rule_name}")
-                  failed = true
-                end
+                # Log that we are done
+                logger.info("task #{rule_name} completed")
+
+                # Publish the output file
+                file_engine.publish(rule_name)
+
+                # Update priority of corresponding tasks
+                update_file_rule_dependencies(rule_name)
+
+                # We are done here
+                ts.write([:task, rule_name, :done])
+              else
+                # Log that we failed
+                logger.info("task #{rule_name} failed")
+
+                # We failed
+                ts.write([:task, rule_name, :failed])
               end
-            else
-              commands.each do |command|
-                logger.info("dry-run: #{command}")
+
+              # Remove working task tuple
+              ts.take(working_tuple)
+            end
+          end
+        end
+        return
+      end
+
+      private
+      # Executes the given block while maintaining the rule queue updated with the latest
+      # changes and rule events.
+      #
+      # @return [void]
+      def with_rule_queue
+        # The dependencies hash, to be modified for each done task
+        rule_dependencies = service(:rule).dependencies
+
+        # Inverse dependency hash: which files concern which rules
+        @file_dependencies = {}
+        rule_dependencies.each do |rule, deps|
+          deps.each do |file|
+            @file_dependencies[file] = [] unless @file_dependencies[file]
+            @file_dependencies[file] << rule
+          end
+        end
+
+        # Build the initial priority queue
+        @rule_queue = PriorityQueue.new
+        rule_dependencies.each do |rule, deps|
+          @rule_queue.push(rule, deps.length)
+        end
+
+        # Notifier and associated thread to remove done tasks
+        notifier = ts.notify('write', [:task, nil, :done])
+        dep_thread = Thread.start do
+          notifier.each do |event, tuple|
+            @rule_queue.delete(tuple[1])
+          end
+        end
+
+        # Remove all already done tasks
+        ts.read_all([:task, nil, :done]).each do |t|
+          @rule_queue.delete t[1]
+        end
+
+        begin
+          yield
+        ensure
+          # Terminate notifier
+          notifier.cancel
+          dep_thread.join
+        end
+        return
+      end
+
+      # Executes the commands of the current rule
+      #
+      # @param [Array<String>] commands List of commands to execute
+      # @param [String] rule_name Name of the rule being computed
+      # @return [Boolean] true if the command succeeded
+      def run_rule_commands(commands, rule_name)
+        commands.each do |command|
+          logger.info("run: #{command}")
+
+          # execute verbatim command, redirect stderr
+          Open3.popen2e(command) do |input, pipe, t|
+            output = ''
+
+            loop do
+              begin
+                output += pipe.read_nonblock(80)
+              rescue IO::WaitReadable
+                IO.select([pipe])
+                retry
+              rescue EOFError
+                break
               end
             end
 
-            unless failed
-              # Log that we are done
-              logger.info("task #{rule_name} completed")
+            # Wait for process completion
+            exit_status = t.value
 
-              # Publish the output file
-              file_engine.publish(rule_name)
-
-              # We are done here
-              ts.write([:task, rule_name, :done])
+            # Log command return code
+            suffix = unless output.empty? then
+                       ": #{output}"
+                     else
+                       ""
+                     end
+            if exit_status.success?
+              logger.info("success#{suffix}")
             else
-              # Log that we failed
-              logger.info("task #{rule_name} failed")
-
-              # We failed
-              ts.write([:task, rule_name, :failed])
+              logger.error("failure (#{$?})#{suffix}")
+              failed = true
             end
+          end
 
-            # Remove working task tuple
-            ts.take(working_tuple)
+          break if failed
+        end
+
+        # Ensure the commands produced an output file
+        unless failed
+          unless file_engine.available? rule_name
+            logger.error("no output file produced for #{rule_name}")
+            failed = true
+          end
+        end
+
+        !failed
+      end
+
+      # Updates the task priority queue by considering the given file
+      # became available.
+      #
+      # @param [String] file Name of the file that became available
+      # @return [void]
+      def update_file_rule_dependencies(file)
+        if deps = @file_dependencies[file]
+          deps.each do |rule|
+            @rule_queue.change_priority(rule, @rule_queue[rule] - 1)
           end
         end
         return

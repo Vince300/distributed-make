@@ -1,5 +1,3 @@
-require "distributed_make/block_writer"
-
 module DistributedMake
   # Represents a file being shared in a tuple space
   class FileHandle
@@ -8,16 +6,9 @@ module DistributedMake
     # @return [String] absolute path to the file to be shared
     attr_reader :file
 
-    # @return [Boolean] `true` if this handle belongs to a worker process, `false` otherwise
-    def worker?
-      !!@worker
-    end
-
     # @param [String] file absolute path to the file represented by this handle
-    # @param [Boolean] worker `true` if this handle belongs to a worker process, `false` otherwise
-    def initialize(file, worker)
+    def initialize(file)
       @file = file
-      @worker = worker
     end
 
     # Transfers the file to the given block.
@@ -28,8 +19,9 @@ module DistributedMake
     def get_data(remote_host, &block)
       # Dump the whole file to the given block
       File.open(file, "rb") do |input|
-        BlockWriter.open(block) do |bl|
-          IO.copy_stream(input, bl)
+        buffer = ""
+        while input.read(1048576, buffer) # 1MB read into reused buffer
+          yield(buffer)
         end
       end
       return

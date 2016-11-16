@@ -75,22 +75,21 @@ module DistributedMake
       loop do
         # Find the file on the pool
         target_tuple = begin
-          ts.read([:file, file, host, nil], 0) # Try to find the file on the same host
+          ts.read([:file, file, host, nil, nil], 0) # Try to find the file on the same host
         rescue Rinda::RequestExpiredError
-          all_tuples = ts.read_all([:file, file, nil, nil])
+          all_tuples = ts.read_all([:file, file, nil, nil, nil])
 
           # Prefer loading the workers for file transfers instead of the driver
           if all_tuples.empty?
-            ts.read([:file, file, nil, nil])
+            ts.read([:file, file, nil, nil, nil])
           else
-            all_tuples.select { |t| t[3].worker? }.sample ||
-              all_tuples.sample
+            all_tuples.select { |t| t[3] }.sample || all_tuples.sample
           end
         end
 
         # Connection properties
         remote_host = target_tuple[2]
-        agent = target_tuple[3]
+        agent = target_tuple[4]
 
         if remote_host == host
           begin
@@ -134,17 +133,15 @@ module DistributedMake
     # @param [Pathname, String] file relative path to the file to be published
     # @return [void]
     def publish(file)
-      file = file.to_s unless file.is_a? String
-
       unless @published_files[file]
         logger.debug("publishing #{file}")
 
         # Keep the reference to the handle so the GC doesn't collect the object
-        handle = FileHandle.new(File.join(dir, file), @worker)
+        handle = FileHandle.new(File.join(dir, file))
 
         @published_files[file] = [
           handle,
-          ts.write([:file, file, host, handle], period)
+          ts.write([:file, file, host, !!@worker, handle], period)
         ]
       end
       return
