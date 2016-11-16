@@ -12,6 +12,7 @@ sub provision_host {
 
   if ($first) {
     system('scp ~/.ssh/id_rsa dismake@' . $host . ':~/.ssh/');
+    system('ssh dismake@' . $host . q{ 'mkdir ~/distributed-make-src'});
     system('scp -r ../../distributed-make/* dismake@' . $host . ':~/distributed-make-src/');
     system('ssh dismake@' . $host . q{ 'bash -c "cd distributed-make-src && /usr/local/rvm/bin/rvm default do bundle install"'})
   }
