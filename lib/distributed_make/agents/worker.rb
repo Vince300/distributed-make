@@ -111,7 +111,7 @@ module DistributedMake
             rq = @rule_queue.to_a
             tuple = nil
             rq.each do |target, priority|
-              if priority < rule_dependencies[target].length
+              if priority < service(:rule).dependencies(target).length
                 begin
                   tuple = ts.take([:task, target, :todo], 0)
                   break
@@ -238,6 +238,7 @@ module DistributedMake
       # @param [String] rule_name Name of the rule being computed
       # @return [Boolean] true if the command succeeded
       def run_rule_commands(commands, rule_name)
+        failed = false
         commands.each do |command|
           logger.info("run: #{command}")
 
@@ -295,7 +296,9 @@ module DistributedMake
       def update_file_rule_dependencies(file)
         if deps = @file_dependencies[file]
           deps.each do |rule|
-            @rule_queue.change_priority(rule, @rule_queue[rule] - 1)
+            if priority = @rule_queue[rule]
+              @rule_queue.change_priority(rule, priority - 1)
+            end
           end
         end
         return
