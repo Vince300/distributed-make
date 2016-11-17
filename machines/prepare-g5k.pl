@@ -44,7 +44,8 @@ unlink for <../config/grid5000-*.yml>;
 
 # Build files for all worker counts up to hosts * 8 - 1
 for my $cnt (1..(8 * (scalar @hosts) - 1)) {
-  open ENVFILE, ">../config/grid5000-$cnt.yml";
+  my $filename = sprintf('grid5000-%.3d.yml', $cnt);
+  open ENVFILE, ">../config/$filename";
   print ENVFILE <<EOT;
 ---
 release_path: /home/dismake/distributed-make
