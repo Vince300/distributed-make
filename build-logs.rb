@@ -9,10 +9,13 @@ FileUtils.rmtree('log') if Dir.exist? 'log'
 Dir.mkdir('log')
 
 # Stop daemons
-`RAKE_ENV=#{env} rake daemon:stop`
+`RAKE_ENV=grid5000-119 rake daemon:stop`
+
+env_files = Dir.glob("config/grid5000-*.yml").sort
+env_files.reverse! if ARGV.include? "--reverse"
 
 # For each possible setup
-Dir.glob("config/grid5000-*.yml").sort.each do |f|
+env_files.each do |f|
   # Environment name
   env = File.basename(f, '.yml')
 
@@ -30,11 +33,12 @@ Dir.glob("config/grid5000-*.yml").sort.each do |f|
     Dir.chdir(folder) do
       system("bundle exec distributed-make >#{log_file}")
     end
+    `RAKE_ENV=#{env} rake daemon:stop`
   end
 end
 
 # Stop daemons
-`RAKE_ENV=#{env} rake daemon:stop`
+`RAKE_ENV=grid5000-119 rake daemon:stop`
 
 # Tar the logs
 system("tar cJf $(date '+%y-%m-%d-%H-%M-%S').tar.bz2 log")

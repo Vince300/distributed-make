@@ -3,3 +3,5 @@ tar:
 		--exclude='distributed-make/bin' --exclude='distributed-make/machines/.vagrant' -cJf distributed-make.tar.bz2 \
 		distributed-make && mv distributed-make.tar.bz2 distributed-make/
 
+send: tar
+	echo "put distributed-make.tar.bz2 grenoble" | sftp grid5000
