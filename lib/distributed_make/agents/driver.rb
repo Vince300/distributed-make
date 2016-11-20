@@ -5,6 +5,7 @@ require "distributed_make/services/log_service"
 require "distributed_make/services/rule_service"
 require "distributed_make/services/workers_service"
 require "distributed_make/source_error"
+require "distributed_make/rule_owner_handle"
 
 require "drb/drb"
 require "rinda/tuplespace"
@@ -174,7 +175,7 @@ module DistributedMake
       def on_task_write(tuple, notifier)
         rule_name = tuple[1]
 
-        if tuple[2] == :done
+        if not tuple[2].is_a? Symbol
           # A task is completed
           ts.take([:task, rule_name, tuple[2]])
 
@@ -193,7 +194,23 @@ module DistributedMake
             end
 
             # This task is now done
-            rule_done(@task_dict[rule_name])
+            sent_rule_back = false
+            rule_done(@task_dict[rule_name]) do |rule|
+              unless sent_rule_back
+                logger.info("sending #{rule.name} back to the worker")
+                # we are processing it
+                rule.processing = true
+                # worker timeout detection
+                write_task_scheduled(rule.name)
+                # send the rule
+                tuple[2].set_next_rule([:task, rule.name, :todo])
+                # only send one rule
+                sent_rule_back = true
+                false # this worker has reserved this rule
+              else
+                true # publish the rule for any worker
+              end
+            end
 
             # Root rule completed?
             if @task_tree.done?
@@ -265,14 +282,21 @@ module DistributedMake
           # If the worker goes away before pushing the :working task, this unit will be lost
           logger.debug("task #{rule_name} has been scheduled")
 
-          unless unsafe?
-            # Add a tuple that explains this
-            # Its expire should be short, so just set it to a few periods
-            ts.write([:task, rule_name, :scheduled], 5 * service(:job).period)
-          end
+          write_task_scheduled(rule_name)
 
           # Note that the first task being scheduled indicates a worker joined the space, so start timing now
           @started_at = Time.now unless @started_at
+        end
+      end
+
+      # Writes the task scheduled timeout tuple if enabled
+      #
+      # @param [String] rule_name name of the associated rule
+      def write_task_scheduled(rule_name)
+        unless unsafe?
+          # Add a tuple that explains this
+          # Its expire should be short, so just set it to a few periods
+          ts.write([:task, rule_name, :scheduled], 5 * service(:job).period)
         end
       end
 
@@ -350,8 +374,9 @@ module DistributedMake
       # Flags a rule as done after processing. Adds rules that can be processed as soon as possible.
       #
       # @param [Rule] rule make rule to flag as done
+      # @yieldparam [Rule] rule rule that is ready to be processed. Return false to prevent publishing the rule.
       # @return [Rule] rule flagged as done
-      def rule_done(rule)
+      def rule_done(rule, &block)
         rule.done = true
         rule.processing = false
         logger.info("task #{rule.name} is completed")
@@ -363,11 +388,13 @@ module DistributedMake
             if parent.ready?
               if parent.phony?
                 # Walk up the dependency tree
-                rule_done(parent)
+                rule_done(parent, &block)
               else
                 # The rule is ready to be processed
                 logger.debug("task #{parent.name} is ready to be processed")
-                add_rule(parent)
+                if block.call(parent)
+                  add_rule(parent)
+                end
               end
             end
           end

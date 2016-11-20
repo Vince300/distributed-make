@@ -2,6 +2,7 @@ require "distributed_make/base"
 require "distributed_make/agents/agent"
 require "distributed_make/utils/simple_renewer"
 require "distributed_make/utils/multilog"
+require "distributed_make/rule_owner_handle"
 
 require "drb/drb"
 require "rinda/ring"
@@ -99,11 +100,18 @@ module DistributedMake
       # @return [void]
       def process_work
         # Forever
+        tuple = nil
+        handle = RuleOwnerHandle.new do |t|
+          tuple = t
+        end
+
         loop do
           attempt = 0
 
           # Wait for a task
-          tuple = ts.take([:task, nil, :todo])
+          unless tuple
+            tuple = ts.take([:task, nil, :todo])
+          end
           logger.info("got task #{tuple[1]}")
 
           # The obtained rule name
@@ -113,14 +121,14 @@ module DistributedMake
             # Tell tuple space we are processing, watching for timeout
             working_tuple = [:task, rule_name, :working]
             with_renewer(ts.write(working_tuple, service(:job).period)) do
-              process_rule(rule_name)
+              process_rule(rule_name, handle)
 
               # Remove working task tuple
               ts.take(working_tuple)
             end
           else
             # Process directly
-            process_rule(rule_name)
+            process_rule(rule_name, handle)
           end
         end
         return
@@ -131,7 +139,8 @@ module DistributedMake
       # Process the given rule
       #
       # @param [String] rule_name Name of the rule to process
-      def process_rule(rule_name)
+      # @param [RuleOwnerHandle] handle Owner compute rule owner handle
+      def process_rule(rule_name, handle)
         # Fetch all dependencies
         service(:rule).dependencies(rule_name).each do |dep|
           file_engine.get(dep)
@@ -159,7 +168,7 @@ module DistributedMake
           file_engine.publish(rule_name)
 
           # We are done here
-          ts.write([:task, rule_name, :done])
+          ts.write([:task, rule_name, handle.handle])
         else
           # Log that we failed
           logger.info("task #{rule_name} failed")
