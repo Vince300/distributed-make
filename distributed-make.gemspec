@@ -52,7 +52,4 @@ Gem::Specification.new do |spec|
 
   # Command line interface
   spec.add_runtime_dependency 'commander', '~>4.4'
-
-  # Priority queue
-  spec.add_runtime_dependency 'PriorityQueue', '~> 0.1'
 end

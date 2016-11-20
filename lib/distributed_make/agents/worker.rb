@@ -6,8 +6,6 @@ require "distributed_make/utils/multilog"
 require "drb/drb"
 require "rinda/ring"
 
-require "priority_queue"
-
 require "tmpdir"
 require "open3"
 
@@ -100,51 +98,29 @@ module DistributedMake
       #
       # @return [void]
       def process_work
-        with_rule_queue do
-          # Forever
-          loop do
-            attempt = 0
+        # Forever
+        loop do
+          attempt = 0
 
-            # Find out best option using priority queue
-            # Note that we use "to_a" so the dep_thread doesn't modify
-            # the priority queue while we are enumerating it
-            rq = @rule_queue.to_a
-            tuple = nil
-            rq.each do |target, priority|
-              if priority < service(:rule).dependencies(target).length
-                begin
-                  tuple = ts.take([:task, target, :todo], 0)
-                  break
-                rescue Rinda::RequestExpiredError
-                  attempt = attempt + 1
-                end
-              end
-            end
+          # Wait for a task
+          tuple = ts.take([:task, nil, :todo])
+          logger.info("got task #{tuple[1]}")
 
-            # We couldn't get a task, wait for one
-            unless tuple
-              tuple = ts.take([:task, nil, :todo])
-              logger.info("got last-chance task #{tuple[1]}")
-            else
-              logger.info("got #{attempt}/#{rq.length} task #{tuple[1]}")
-            end
+          # The obtained rule name
+          rule_name = tuple[1]
 
-            # The obtained rule name
-            rule_name = tuple[1]
-
-            unless unsafe?
-              # Tell tuple space we are processing, watching for timeout
-              working_tuple = [:task, rule_name, :working]
-              with_renewer(ts.write(working_tuple, service(:job).period)) do
-                process_rule(rule_name)
-
-                # Remove working task tuple
-                ts.take(working_tuple)
-              end
-            else
-              # Process directly
+          unless unsafe?
+            # Tell tuple space we are processing, watching for timeout
+            working_tuple = [:task, rule_name, :working]
+            with_renewer(ts.write(working_tuple, service(:job).period)) do
               process_rule(rule_name)
+
+              # Remove working task tuple
+              ts.take(working_tuple)
             end
+          else
+            # Process directly
+            process_rule(rule_name)
           end
         end
         return
@@ -159,9 +135,6 @@ module DistributedMake
         # Fetch all dependencies
         service(:rule).dependencies(rule_name).each do |dep|
           file_engine.get(dep)
-
-          # Update priority of corresponding tasks
-          update_file_rule_dependencies(dep)
         end
 
         # Find what we have to do
@@ -185,9 +158,6 @@ module DistributedMake
           # Publish the output file
           file_engine.publish(rule_name)
 
-          # Update priority of corresponding tasks
-          update_file_rule_dependencies(rule_name)
-
           # We are done here
           ts.write([:task, rule_name, :done])
         else
@@ -197,52 +167,6 @@ module DistributedMake
           # We failed
           ts.write([:task, rule_name, :failed])
         end
-      end
-
-      # Executes the given block while maintaining the rule queue updated with the latest
-      # changes and rule events.
-      #
-      # @return [void]
-      def with_rule_queue
-        # The dependencies hash, to be modified for each done task
-        rule_dependencies = service(:rule).dependencies
-
-        # Inverse dependency hash: which files concern which rules
-        @file_dependencies = {}
-        rule_dependencies.each do |rule, deps|
-          deps.each do |file|
-            @file_dependencies[file] = [] unless @file_dependencies[file]
-            @file_dependencies[file] << rule
-          end
-        end
-
-        # Build the initial priority queue
-        @rule_queue = PriorityQueue.new
-        rule_dependencies.each do |rule, deps|
-          @rule_queue.push(rule, deps.length)
-        end
-
-        # Notifier and associated thread to remove done tasks
-        notifier = ts.notify('write', [:task, nil, :done])
-        dep_thread = Thread.start do
-          notifier.each do |event, tuple|
-            @rule_queue.delete(tuple[1])
-          end
-        end
-
-        # Remove all already done tasks
-        ts.read_all([:task, nil, :done]).each do |t|
-          @rule_queue.delete t[1]
-        end
-
-        begin
-          yield
-        ensure
-          # Terminate notifier
-          notifier.cancel
-          dep_thread.join
-        end
-        return
       end
 
       # Executes the commands of the current rule
@@ -299,22 +223,6 @@ module DistributedMake
         end
 
         !failed
-      end
-
-      # Updates the task priority queue by considering the given file
-      # became available.
-      #
-      # @param [String] file Name of the file that became available
-      # @return [void]
-      def update_file_rule_dependencies(file)
-        if deps = @file_dependencies[file]
-          deps.each do |rule|
-            if priority = @rule_queue[rule]
-              @rule_queue.change_priority(rule, priority - 1)
-            end
-          end
-        end
-        return
       end
     end
   end
