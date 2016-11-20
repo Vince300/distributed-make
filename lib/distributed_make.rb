@@ -10,7 +10,6 @@ require "distributed_make/makefile/body"
 require "distributed_make/makefile/command"
 require "distributed_make/makefile/identifier"
 require "distributed_make/makefile/rule"
-require "distributed_make/rule_owner_handle"
 
 require "distributed_make/services/job_service"
 require "distributed_make/services/log_service"
