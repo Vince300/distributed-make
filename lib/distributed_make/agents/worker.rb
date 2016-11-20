@@ -54,7 +54,7 @@ module DistributedMake
 
             # Register the new logger
             logger.add_logger(service(:log).logger)
-            logger.info("joined the worker pool")
+            service(:workers).joined($LOGGER_NAME)
 
             # Create the temporary working directory
             Dir.mktmpdir("distributed-make") do |tmpdir|

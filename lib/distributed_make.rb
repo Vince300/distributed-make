@@ -14,6 +14,7 @@ require "distributed_make/makefile/rule"
 require "distributed_make/services/job_service"
 require "distributed_make/services/log_service"
 require "distributed_make/services/rule_service"
+require "distributed_make/services/workers_service"
 
 require "distributed_make/utils/multilog"
 require "distributed_make/utils/simple_renewer"

@@ -3,6 +3,7 @@ require "distributed_make/agents/agent"
 require "distributed_make/services/job_service"
 require "distributed_make/services/log_service"
 require "distributed_make/services/rule_service"
+require "distributed_make/services/workers_service"
 require "distributed_make/source_error"
 
 require "drb/drb"
@@ -29,8 +30,9 @@ module DistributedMake
       # @param [Bool] dry_run `true` to enable dry-run
       # @param [Fixnum] period period of the main tuple space
       # @param [Boolean] unsafe enable unsafe mode
+      # @param [Integer] worker_count required number of workers to start the job
       # @yieldparam [Driver] agent running driver agent
-      def run(host = nil, job_name = nil, dry_run = false, period = 5, unsafe = false)
+      def run(host = nil, job_name = nil, dry_run = false, period = 5, unsafe = false, worker_count = 0)
         logger.debug("begin #{__method__.to_s}")
 
         # Start DRb service
@@ -44,6 +46,10 @@ module DistributedMake
 
         # Register the log service (use the Logger instance, not the Multilog)
         register_service(:log, Services::LogService.new(logger.loggers.first))
+
+        # Register the worker tracking service
+        register_service(:workers, Services::WorkersService.new(logger))
+        @worker_count = worker_count
 
         # Compute Ring server addresses
         # Default: bind to 0.0.0.0
@@ -112,6 +118,10 @@ module DistributedMake
 
         # Create the notifier that detects task events
         done_notifier = ts.notify(nil, [:task, nil, nil])
+
+        # Wait for the workers
+        logger.info("waiting for #{@worker_count} workers to join the pool")
+        service(:workers).wait_for(@worker_count)
 
         # Add all nodes that are not done
         append_not_done(tree)
