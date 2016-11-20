@@ -32,7 +32,7 @@ env_files.each do |f|
     logger.info("Current example: #{sample}")
     log_file = File.expand_path("log/#{env}-#{sample}.log")
     Dir.chdir(folder) do
-      pid = Process.spawn("bundle exec distributed-make >#{log_file}")
+      pid = Process.spawn("bundle exec distributed-make --unsafe >#{log_file}")
       # Sleep for 0.5s
       sleep(0.5)
       # Start daemons
