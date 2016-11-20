@@ -4,7 +4,6 @@ require "distributed_make/file_handle"
 require "fileutils"
 require "tempfile"
 require "drb/drb"
-require "thread"
 
 module DistributedMake
   class FileEngine
@@ -23,26 +22,19 @@ module DistributedMake
     # @return [Integer] Tuple space period
     attr_reader :period
 
-    # @return [Integer] Maximum concurrent transfers
-    attr_reader :concurrency
-
     # @param [String] host Hostname to use for the TCP server
     # @param [Rinda::TupleSpace] ts Tuple space to support file sharing
     # @param [String] dir Working directory to manage
     # @param [Logger] logger Logger to report events to
     # @param [Integer] period Tuple space period
     # @param [Boolean] worker true if this engine is running in a worker
-    # @param [Integer] concurrency Maximum number of concurrent connections to this engine
-    def initialize(host, ts, dir, logger, period, worker, concurrency)
+    def initialize(host, ts, dir, logger, period, worker)
       @host = host
       @ts = ts
       @dir = dir
       @logger = logger
       @period = period
       @worker = worker
-      @concurrency = concurrency
-      @client_count = 0
-      @client_mtx = Mutex.new
       @published_files = {}
 
       @run_renewer = true
@@ -122,11 +114,6 @@ module DistributedMake
             end
           end
 
-          if result == :prefer_other
-            logger.warn("#{remote_host} is transferring too many files, trying another")
-            next
-          end
-
           # Move the tempfile away
           tmp.close
           FileUtils.mv(tmp.path, File.join(dir, file))
@@ -150,38 +137,13 @@ module DistributedMake
         logger.debug("publishing #{file}")
 
         # Keep the reference to the handle so the GC doesn't collect the object
-        handle = FileHandle.new(File.join(dir, file), self)
+        handle = FileHandle.new(File.join(dir, file))
 
         @published_files[file] = [
           handle,
           ts.write([:file, file, host, !!@worker, handle], period)
         ]
       end
-      return
-    end
-
-    # Called by {FileHandle}s to request a file transfer slot
-    #
-    # @return [Boolean] true if a host has been allocated, false otherwise
-    def request_transfer
-      @client_mtx.synchronize {
-        current_clients = @client_count + 1
-        if current_clients > concurrency
-          false
-        else
-          @client_count = current_clients
-          true
-        end
-      }
-    end
-
-    # Called by {FileHandle}s to free a file transfer slot
-    #
-    # @return [void]
-    def complete_transfer
-      @client_mtx.synchronize {
-        @client_count -= 1
-      }
       return
     end
   end

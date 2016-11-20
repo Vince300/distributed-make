@@ -29,9 +29,8 @@ module DistributedMake
       # @param [Bool] dry_run `true` to enable dry-run
       # @param [Fixnum] period period of the main tuple space
       # @param [Boolean] unsafe enable unsafe mode
-      # @param [Integer] file_concurrency file engine concurrency level
       # @yieldparam [Driver] agent running driver agent
-      def run(host = nil, job_name = nil, dry_run = false, period = 5, unsafe = false, file_concurrency = 8)
+      def run(host = nil, job_name = nil, dry_run = false, period = 5, unsafe = false)
         logger.debug("begin #{__method__.to_s}")
 
         # Start DRb service
@@ -41,7 +40,7 @@ module DistributedMake
         join_tuple_space(Rinda::TupleSpace.new(period))
 
         # Register the job service
-        register_service(:job, Services::JobService.new(job_name, dry_run, period, unsafe, file_concurrency))
+        register_service(:job, Services::JobService.new(job_name, dry_run, period, unsafe))
 
         # Register the log service (use the Logger instance, not the Multilog)
         register_service(:log, Services::LogService.new(logger.loggers.first))

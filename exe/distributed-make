@@ -48,10 +48,9 @@ command :driver do |c|
   c.option '-n', '--dry-run', 'Enable dry-run mode to test workers'
   c.option '--profile', 'Enable profiling of the driver process' if defined? RubyProf
   c.option '--unsafe', 'Disable safety measures'
-  c.option '--concurrency LEVEL', Integer, 'Concurrency level for file transfers, defaults to 8'
   c.action do |args, options|
     # Setup defaults
-    options.default period: 5, f: 'Makefile', concurrency: 8
+    options.default period: 5, f: 'Makefile'
 
     # The name of the Makefile to process
     filename = options.f
@@ -67,12 +66,6 @@ command :driver do |c|
       break
     else
       wanted_rule = args.first
-    end
-
-    # Check concurrency level arg
-    if options.concurrency <= 0
-      logger.error("concurrency level must be strictly positive")
-      break
     end
 
     begin
@@ -101,7 +94,7 @@ command :driver do |c|
       job_name = File.basename(File.expand_path(Dir.getwd))
 
       # Start the Makefile driver
-      driver.run(options.host, job_name, options.dry_run, options.period, options.unsafe, options.concurrency) do |agent|
+      driver.run(options.host, job_name, options.dry_run, options.period, options.unsafe) do |agent|
         # Tell the agent to start processing the current tree
         if options.profile
           result = RubyProf.profile do

@@ -96,7 +96,7 @@ module DistributedMake
       # @param [Boolean] worker true if this agent is a worker
       def with_file_engine(period, worker)
         # Create the file engine
-        @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period, worker, service(:job).file_concurrency)
+        @file_engine = DistributedMake::FileEngine.new(host, ts, Dir.pwd, logger, period, worker)
 
         # Invoke the callback
         begin
