@@ -1,12 +1,12 @@
 require 'logger'
 require 'fileutils'
 require 'tempfile'
+require 'open3'
 
 logger = Logger.new(STDOUT)
 
 # Prepare log directory
-FileUtils.rmtree('log') if Dir.exist? 'log'
-Dir.mkdir('log')
+Dir.mkdir('log') unless Dir.exist? 'log'
 
 # Deploy and start
 system("RAKE_ENV=grid5000-119 rake deploy daemon:stop daemon:start")
@@ -21,8 +21,9 @@ env_files.each do |f|
 
   logger.info("Current environment: #{env}")
 
-  # Cleanup examples
-  `RAKE_ENV=#{env} rake examples:clean`
+  # Cleanup environment
+  `RAKE_ENV=grid5000-119 rake daemon:stop`
+  `RAKE_ENV=#{env} rake examples:clean daemon:start`
 
   Dir.glob("spec/fixtures/*").each do |folder|
     # Store logs
@@ -35,7 +36,15 @@ env_files.each do |f|
 
       Dir.chdir(folder) do
         Tempfile.open do |file|
-          system("bundle exec distributed-make --workers #{workers} >#{file.path}")
+          File.open(file, "w") do |log|
+            Open3.popen2e("bundle exec distributed-make --workers #{workers}") do |stdin, stdout, wait_thr|
+              while line = stdout.gets
+                log.puts(line)
+                puts line
+              end
+            end
+          end
+
           FileUtils.cp(file.path, log_file)
         end
       end

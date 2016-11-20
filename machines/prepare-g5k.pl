@@ -31,7 +31,7 @@ my @workers = (
 );
 
 # Read hosts to an array
-open HOSTFILE, 'hostfile.txt';
+open HOSTFILE, shift @ARGV;
 my @hosts;
 while (<HOSTFILE>) {
   chomp;
