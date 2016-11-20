@@ -19,15 +19,22 @@ module DistributedMake::Services
       @unsafe
     end
 
+    # @return [Integer] Maximum number of concurrent connections to file engines
+    def file_concurrency
+      @file_concurrency
+    end
+
     # @param [String] name the job's name
     # @param [Bool] dry_run `true` to enable dry-run
     # @param [Integer] period Rinda service period to use as timeout base
     # @param [Bool] unsafe `true` if unsafe mode is enabled
-    def initialize(name, dry_run, period, unsafe)
+    # @param [Integer] file_concurrency Maximum number of concurrent connections to file engines
+    def initialize(name, dry_run, period, unsafe, file_concurrency)
       @name = name
       @dry_run = dry_run
       @period = period
       @unsafe = unsafe
+      @file_concurrency = file_concurrency
     end
   end
 end
