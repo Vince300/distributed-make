@@ -132,53 +132,18 @@ module DistributedMake
             # The obtained rule name
             rule_name = tuple[1]
 
-            # Tell tuple space we are processing, watching for timeout
-            working_tuple = [:task, rule_name, :working]
-            with_renewer(ts.write(working_tuple, service(:job).period)) do
-              # Fetch all dependencies
-              service(:rule).dependencies(rule_name).each do |dep|
-                file_engine.get(dep)
+            unless unsafe?
+              # Tell tuple space we are processing, watching for timeout
+              working_tuple = [:task, rule_name, :working]
+              with_renewer(ts.write(working_tuple, service(:job).period)) do
+                process_rule(rule_name)
 
-                # Update priority of corresponding tasks
-                update_file_rule_dependencies(dep)
+                # Remove working task tuple
+                ts.take(working_tuple)
               end
-
-              # Find what we have to do
-              commands = service(:rule).commands(rule_name)
-
-              # Status of executed commands
-              failed = false
-
-              unless service(:job).dry_run?
-                failed = !run_rule_commands(commands, rule_name)
-              else
-                commands.each do |command|
-                  logger.info("dry-run: #{command}")
-                end
-              end
-
-              unless failed
-                # Log that we are done
-                logger.info("task #{rule_name} completed")
-
-                # Publish the output file
-                file_engine.publish(rule_name)
-
-                # Update priority of corresponding tasks
-                update_file_rule_dependencies(rule_name)
-
-                # We are done here
-                ts.write([:task, rule_name, :done])
-              else
-                # Log that we failed
-                logger.info("task #{rule_name} failed")
-
-                # We failed
-                ts.write([:task, rule_name, :failed])
-              end
-
-              # Remove working task tuple
-              ts.take(working_tuple)
+            else
+              # Process directly
+              process_rule(rule_name)
             end
           end
         end
@@ -186,6 +151,54 @@ module DistributedMake
       end
 
       private
+
+      # Process the given rule
+      #
+      # @param [String] rule_name Name of the rule to process
+      def process_rule(rule_name)
+        # Fetch all dependencies
+        service(:rule).dependencies(rule_name).each do |dep|
+          file_engine.get(dep)
+
+          # Update priority of corresponding tasks
+          update_file_rule_dependencies(dep)
+        end
+
+        # Find what we have to do
+        commands = service(:rule).commands(rule_name)
+
+        # Status of executed commands
+        failed = false
+
+        unless service(:job).dry_run?
+          failed = !run_rule_commands(commands, rule_name)
+        else
+          commands.each do |command|
+            logger.info("dry-run: #{command}")
+          end
+        end
+
+        unless failed
+          # Log that we are done
+          logger.info("task #{rule_name} completed")
+
+          # Publish the output file
+          file_engine.publish(rule_name)
+
+          # Update priority of corresponding tasks
+          update_file_rule_dependencies(rule_name)
+
+          # We are done here
+          ts.write([:task, rule_name, :done])
+        else
+          # Log that we failed
+          logger.info("task #{rule_name} failed")
+
+          # We failed
+          ts.write([:task, rule_name, :failed])
+        end
+      end
+
       # Executes the given block while maintaining the rule queue updated with the latest
       # changes and rule events.
       #

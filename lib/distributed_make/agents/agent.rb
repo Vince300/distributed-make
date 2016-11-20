@@ -127,6 +127,11 @@ module DistributedMake
           thd.join
         end
       end
+
+      # return [Bool] true if the make process is running in unsafe mode
+      def unsafe?
+        service(:job).unsafe?
+      end
     end
   end
 end

@@ -47,6 +47,7 @@ command :driver do |c|
   c.option '-f MAKEFILE', String, 'Name of the makefile to process, defaults to Makefile'
   c.option '-n', '--dry-run', 'Enable dry-run mode to test workers'
   c.option '--profile', 'Enable profiling of the driver process' if defined? RubyProf
+  c.option '--unsafe', 'Disable safety measures'
   c.action do |args, options|
     # Setup defaults
     options.default period: 5, f: 'Makefile'
@@ -93,7 +94,7 @@ command :driver do |c|
       job_name = File.basename(File.expand_path(Dir.getwd))
 
       # Start the Makefile driver
-      driver.run(options.host, job_name, options.dry_run, options.period) do |agent|
+      driver.run(options.host, job_name, options.dry_run, options.period, options.unsafe) do |agent|
         # Tell the agent to start processing the current tree
         if options.profile
           result = RubyProf.profile do

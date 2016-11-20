@@ -28,8 +28,9 @@ module DistributedMake
       # @param [String] job_name name of the job to report
       # @param [Bool] dry_run `true` to enable dry-run
       # @param [Fixnum] period period of the main tuple space
+      # @param [Boolean] unsafe enable unsafe mode
       # @yieldparam [Driver] agent running driver agent
-      def run(host = nil, job_name = nil, dry_run = false, period = 5)
+      def run(host = nil, job_name = nil, dry_run = false, period = 5, unsafe = false)
         logger.debug("begin #{__method__.to_s}")
 
         # Start DRb service
@@ -39,7 +40,7 @@ module DistributedMake
         join_tuple_space(Rinda::TupleSpace.new(period))
 
         # Register the job service
-        register_service(:job, Services::JobService.new(job_name, dry_run, period))
+        register_service(:job, Services::JobService.new(job_name, dry_run, period, unsafe))
 
         # Register the log service (use the Logger instance, not the Multilog)
         register_service(:log, Services::LogService.new(logger.loggers.first))
@@ -168,17 +169,29 @@ module DistributedMake
           ts.take([:task, rule_name, tuple[2]])
 
           begin
-            # If the task is done, fetch the produced file using the engine
-            file_engine.get(rule_name)
+            file_get_thread = Thread.start do
+              # If the task is done, fetch the produced file using the engine
+              file_engine.get(rule_name)
 
-            # The driver now has the file
-            file_engine.publish(rule_name)
+              # The driver now has the file
+              file_engine.publish(rule_name)
+            end
+
+            # Unless unsafe mode is enabled, wait for the file to be fetched
+            unless unsafe?
+              file_get_thread.join
+            end
 
             # This task is now done
             rule_done(@task_dict[rule_name])
 
             # Root rule completed?
             if @task_tree.done?
+              if unsafe?
+                # Ensure we have the output file before terminating
+                file_get_thread.join
+              end
+
               logger.info("build job #{service(:job).name} completed in #{Time.now - @started_at}s")
               notifier.cancel
               return :exit
@@ -242,9 +255,11 @@ module DistributedMake
           # If the worker goes away before pushing the :working task, this unit will be lost
           logger.debug("task #{rule_name} has been scheduled")
 
-          # Add a tuple that explains this
-          # Its expire should be short, so just set it to a few periods
-          ts.write([:task, rule_name, :scheduled], 5 * service(:job).period)
+          unless unsafe?
+            # Add a tuple that explains this
+            # Its expire should be short, so just set it to a few periods
+            ts.write([:task, rule_name, :scheduled], 5 * service(:job).period)
+          end
 
           # Note that the first task being scheduled indicates a worker joined the space, so start timing now
           @started_at = Time.now unless @started_at
