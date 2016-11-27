@@ -31,12 +31,13 @@ to the master process is completed.
 An agent who has a particular file should publish a tuple like the following :
 
 ```ruby
-[:file, name, host, handle]
+[:file, name, host, is_worker?, handle]
 ```
 
 * `:file` indicates this tuple represents a file
 * `name` is the name of the file represented by this tuple
 * `host` is the hostname of the publishing agent (derived from the druby service url)
+* `is_worker?` is a boolean indicating if the file represented by this tuple is hosted by a worker agent
 * `handle` is a distributed object with a method that can be invoked to initiate the file transfer
 
 ## File search algorithm
@@ -44,8 +45,9 @@ An agent who has a particular file should publish a tuple like the following :
 When an agent wants to process a given rule, to find out where to download a file it should try to read the following
 tuples :
 
-* `[:file, name, host, nil]`: wanted file, on the same host, to allow zero-copy between hosts using hardlinking
-* `[:file, name, nil, nil]`: wanted file, on any host, should be chosen randomly
+* `[:file, name, host, nil, nil]`: wanted file, on the same host, to allow zero-copy between hosts using hardlinking
+* `[:file, name, nil, true, nil]`: wanted file, on a worker host, should be chosen randomly
+* `[:file, name, nil, nil, nil]`: wanted file, on any host, should be chosen randomly
 
 ## Handle distributed object
 
@@ -54,10 +56,3 @@ called by the requesting process along with a block, which will be invoked with 
 network.
 
 This method can deny the file transfer in order to better schedule transfer between hosts.
-
-## Multihost optimization
-
-When starting a new build process, workers will simultaneously request files from the driver process, as none have the
-file for hardlinking. In order to prevent that, the file serving agent should only allocate one slot per (host,
-requested file) combination, so the requesting process will retry downloading the file from another host, eventually
-requesting the file from the same host and creating the hardlink.

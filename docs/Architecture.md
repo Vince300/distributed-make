@@ -84,6 +84,10 @@ méthodes pour accéder à l'objet de journalisation du processus pilote.
 * `:rule`, type {DistributedMake::Services::RuleService}, fournit des
 informations (commandes à exécuter et dépendances) pour la compilation
 des différentes cibles du Makefile.
+* `:workers`, type {DistributedMake::Services::WorkersService}, permet aux
+workers de s'enregistrer auprès du driver lorsqu'ils rejoignent le tuple
+space. Utilisé pour ne démarrer la compilation qu'au moment où le nombre
+requis de workers est atteint pour les mesures.
 
 Un `read([:service, :job, nil])` permet de récupérer l'objet service pour
 exécuter des opérations. L'objet service peut être une référence (objet

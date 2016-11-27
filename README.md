@@ -21,8 +21,19 @@
 
 ### Livres
 
-* [Humble Little Ruby Book](https://www.dropbox.com/s/b8n41fqogjhpvxq/Humble%20Little%20Ruby%20Book.pdf?dl=0)
-* [The dRuby Book](https://www.dropbox.com/s/ju9xa9n4du0z2cj/The%20dRuby%20Book.pdf?dl=0)
+* [Humble Little Ruby Book](http://www.humblelittlerubybook.com/)
+* [The dRuby Book](https://pragprog.com/book/sidruby/the-druby-book)
+
+## Index
+
+### Instructions
+#### {file:docs/Install.md}
+#### {file:docs/Vagrant.md}
+#### {file:docs/Grid5000.md}
+
+### Documentation
+#### {file:docs/Architecture.md}
+#### {file:docs/FileSystem.md}
 
 ## Quickstart
 
